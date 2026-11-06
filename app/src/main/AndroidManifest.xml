@@ -15,6 +15,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
+        android:allowBackup="false"
         android:theme="@style/Theme.Synccloud">
 
         <!-- Exported so Settings → Accounts can open account settings (see xml/account_preferences.xml) -->
