@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Settings → Accounts → iCloud → (account) → Account settings. Settings adds the account as the "account" extra. -->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceScreen
+        android:summary="@string/account_settings_summary"
+        android:title="@string/account_settings">
+        <intent
+            android:targetClass="io.github.andrewgribben.synccloud.MainActivity"
+            android:targetPackage="io.github.andrewgribben.synccloud" />
+    </PreferenceScreen>
+</PreferenceScreen>
