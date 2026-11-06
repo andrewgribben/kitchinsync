@@ -4,7 +4,7 @@ Sync iCloud **calendars** and **contacts** with Android's built-in calendar and 
 
 Synccloud only sets up the sync. It has no calendar or contacts views of its own. Your iCloud data shows up in the apps you already use (Google/Samsung Calendar, Contacts, WhatsApp, Signal, and so on), the same way a Google or Samsung account does.
 
-> **Status:** pre-alpha. Design stage, so there's no app code yet. See [`docs/PLAN.md`](docs/PLAN.md) and [`docs/wireframes/`](docs/wireframes/).
+> **Status:** pre-alpha. Stage 1: you can add iCloud accounts and choose calendars, but nothing is synced yet. See [`docs/PLAN.md`](docs/PLAN.md) and [`docs/wireframes/`](docs/wireframes/).
 
 ## Goals
 
