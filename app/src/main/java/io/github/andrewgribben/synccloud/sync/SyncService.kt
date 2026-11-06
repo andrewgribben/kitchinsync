@@ -8,12 +8,21 @@ import android.content.Context
 import android.content.Intent
 import android.content.SyncResult
 import android.os.Bundle
+import android.provider.CalendarContract
 import android.provider.ContactsContract
-import android.util.Log
+import androidx.core.content.PermissionChecker
+import at.bitfire.dav4jvm.ktor.exception.UnauthorizedException
 import io.github.andrewgribben.synccloud.account.ICloudAccounts
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.request.basicAuth
+import java.io.IOException
+import java.util.logging.Logger
 
-/** Stage 1 stub: registers the Calendar and Contacts sync switches with Android but doesn't sync data yet. */
 private class SyncAdapter(context: Context) : AbstractThreadedSyncAdapter(context, true) {
+    private val logger = Logger.getLogger(javaClass.name)
+    private val accounts = ICloudAccounts(context)
 
     override fun onPerformSync(
         account: Account,
@@ -22,9 +31,43 @@ private class SyncAdapter(context: Context) : AbstractThreadedSyncAdapter(contex
         provider: ContentProviderClient,
         syncResult: SyncResult,
     ) {
-        Log.i("SyncAdapter", "Sync requested for $authority (not implemented yet)")
-        // Repeated here because the contacts permission may have been granted after setup
-        if (authority == ContactsContract.AUTHORITY) ICloudAccounts(context).makeContactsVisible(account)
+        if (authority == ContactsContract.AUTHORITY)
+            // Repeated here because the contacts permission may have been granted after setup
+            accounts.makeContactsVisible(account)
+
+        val client = HttpClient(OkHttp) {
+            followRedirects = false
+            defaultRequest { basicAuth(account.name, accounts.password(account)) }
+        }
+        try {
+            when (authority) {
+                CalendarContract.AUTHORITY -> {
+                    if (PermissionChecker.checkSelfPermission(context, android.Manifest.permission.WRITE_CALENDAR) != PermissionChecker.PERMISSION_GRANTED) return
+                    CalendarSyncer(account, provider, client).sync(accounts.calendars(account), syncResult)
+                }
+                ContactsContract.AUTHORITY -> {
+                    if (PermissionChecker.checkSelfPermission(context, android.Manifest.permission.WRITE_CONTACTS) != PermissionChecker.PERMISSION_GRANTED) return
+                    val contactsEnabled = accounts.isSyncEnabled(account, ContactsContract.AUTHORITY)
+                    ContactsSyncer(account, context, provider, client)
+                        .sync(if (contactsEnabled) accounts.addressBookUrl(account) else null, syncResult)
+                }
+            }
+            accounts.setLastSynced(account, System.currentTimeMillis())
+            if (accounts.status(account) == ICloudAccounts.STATUS_PASSWORD_NEEDED) {
+                accounts.setStatus(account, null)
+                SyncNotifications.cancelPasswordNeeded(context, account)
+            }
+        } catch (e: UnauthorizedException) {
+            logger.warning("iCloud rejected the password for ${account.name}")
+            accounts.setStatus(account, ICloudAccounts.STATUS_PASSWORD_NEEDED)
+            SyncNotifications.notifyPasswordNeeded(context, account)
+            syncResult.stats.numAuthExceptions++
+        } catch (e: IOException) {
+            logger.warning("I/O error syncing ${account.name}: ${e.message}")
+            syncResult.stats.numIoExceptions++
+        } finally {
+            client.close()
+        }
     }
 }
 

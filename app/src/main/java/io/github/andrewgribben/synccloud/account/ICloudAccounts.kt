@@ -22,6 +22,9 @@ class ICloudAccounts(private val context: Context) {
 
         private const val KEY_CALENDARS = "calendars"
         private const val KEY_ADDRESS_BOOK = "address_book_url"
+        private const val KEY_LAST_SYNCED = "last_synced_millis"
+        private const val KEY_STATUS = "status"
+        const val STATUS_PASSWORD_NEEDED = "password_needed"
     }
 
     private val manager = AccountManager.get(context)
@@ -57,12 +60,27 @@ class ICloudAccounts(private val context: Context) {
     fun setCalendars(account: Account, calendars: List<Calendar>) =
         manager.setUserData(account, KEY_CALENDARS, CalendarsCodec.encode(calendars))
 
+    fun addressBookUrl(account: Account): String? = manager.getUserData(account, KEY_ADDRESS_BOOK)
+
+    /** Timestamp (epoch millis) of the last sync attempt that completed without error, or null if never. */
+    fun lastSynced(account: Account): Long? = manager.getUserData(account, KEY_LAST_SYNCED)?.toLongOrNull()
+
+    fun setLastSynced(account: Account, millis: Long) =
+        manager.setUserData(account, KEY_LAST_SYNCED, millis.toString())
+
+    /** Null when everything is fine; [STATUS_PASSWORD_NEEDED] after a 401 from iCloud. */
+    fun status(account: Account): String? = manager.getUserData(account, KEY_STATUS)
+
+    fun setStatus(account: Account, status: String?) = manager.setUserData(account, KEY_STATUS, status)
+
     // The system's per-account Calendar/Contacts switches (Settings → Accounts) are the source of truth
     fun isSyncEnabled(account: Account, authority: String) =
         ContentResolver.getSyncAutomatically(account, authority)
 
-    fun setSyncEnabled(account: Account, authority: String, enabled: Boolean) =
+    fun setSyncEnabled(account: Account, authority: String, enabled: Boolean) {
+        ContentResolver.setIsSyncable(account, authority, 1) // required for setSyncAutomatically/requestSync to have any effect
         ContentResolver.setSyncAutomatically(account, authority, enabled)
+    }
 
     /** Periodic sync interval in seconds, or null for manual sync only. */
     fun interval(account: Account): Long? =

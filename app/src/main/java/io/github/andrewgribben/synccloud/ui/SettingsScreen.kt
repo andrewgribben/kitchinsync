@@ -100,7 +100,7 @@ fun SettingsScreen(
                 Card(Modifier.fillMaxWidth().padding(16.dp)) {
                     Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            stringResource(interval.label),
+                            lastSyncedLabel(accounts.lastSynced(account)),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.weight(1f),
                         )
@@ -108,6 +108,14 @@ fun SettingsScreen(
                             Text(stringResource(R.string.sync_now))
                         }
                     }
+                }
+            }
+            if (accounts.status(account) == ICloudAccounts.STATUS_PASSWORD_NEEDED) {
+                item {
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.password_needed)) },
+                        modifier = Modifier.clickable(onClick = onChangePassword),
+                    )
                 }
             }
 
@@ -118,6 +126,7 @@ fun SettingsScreen(
                     accounts.setCalendars(account, calendars)
                     accounts.setSyncEnabled(account, CalendarContract.AUTHORITY, calendars.any { it.enabled })
                     if (enabled) requestPermissions.launch(permissionsFor(calendars = true, contacts = false))
+                    accounts.syncNow(account)
                 })
             }
 
@@ -127,6 +136,7 @@ fun SettingsScreen(
                     contacts = enabled
                     accounts.setSyncEnabled(account, ContactsContract.AUTHORITY, enabled)
                     if (enabled) requestPermissions.launch(permissionsFor(calendars = false, contacts = true))
+                    accounts.syncNow(account)
                 })
             }
 

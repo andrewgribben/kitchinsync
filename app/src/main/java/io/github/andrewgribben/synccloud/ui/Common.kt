@@ -86,3 +86,15 @@ fun CalendarItem(calendar: Calendar, onCheckedChange: (Boolean) -> Unit, checkbo
     checkbox = checkbox,
     leading = { ColorDot(calendar.color) },
 )
+
+/** "Synced 2 min ago" / "Synced just now" / "Never synced" (wireframe A chip text, without the "Synced" prefix translation). */
+fun lastSyncedLabel(lastSyncedMillis: Long?): String {
+    if (lastSyncedMillis == null) return "Never synced"
+    val minutes = (System.currentTimeMillis() - lastSyncedMillis) / 60_000
+    return when {
+        minutes < 1 -> "Synced just now"
+        minutes < 60 -> "Synced $minutes min ago"
+        minutes < 24 * 60 -> "Synced ${minutes / 60} h ago"
+        else -> "Synced ${minutes / (24 * 60)} d ago"
+    }
+}

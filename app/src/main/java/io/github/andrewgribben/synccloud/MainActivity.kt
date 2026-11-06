@@ -34,10 +34,13 @@ class MainActivity : ComponentActivity() {
         )?.also { it.onRequestContinued() }
         val account = IntentCompat.getParcelableExtra(intent, "account", Account::class.java)
             ?.takeIf { it in vm.accounts.all() }
+        val reauthAccount = IntentCompat.getParcelableExtra(intent, EXTRA_REAUTH_ACCOUNT, Account::class.java)
+            ?.takeIf { it in vm.accounts.all() }
 
         vm.start(
             when {
                 authenticatorResponse != null -> Screen.SignIn()
+                reauthAccount != null -> Screen.SignIn(reauthAccount)
                 account != null -> Screen.Settings(account)
                 else -> Screen.Accounts
             }
@@ -70,5 +73,10 @@ class MainActivity : ComponentActivity() {
             authenticatorResponse = null
         }
         super.finish()
+    }
+
+    companion object {
+        /** Set by [io.github.andrewgribben.synccloud.sync.SyncNotifications] (wireframe B4's "RE-ENTER PASSWORD"). */
+        const val EXTRA_REAUTH_ACCOUNT = "reauth_account"
     }
 }
