@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Synccloud — Wireframes v1</title>
+<style>
+  :root{
+    --ink:#1b1c1e; --muted:#5d6066; --line:#d6d8dc; --surface:#ffffff; --surface2:#f1f2f4;
+    --page:#e9eaec; --accent:#1f6fb2; --accentSoft:#dbe8f5; --danger:#b3261e; --ok:#2e7d32;
+    --sys:#eceff3; /* Android-owned screens */
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--ink);font:14px/1.4 Roboto,"Segoe UI",system-ui,sans-serif}
+  header{padding:28px 40px 8px;max-width:1800px}
+  header h1{margin:0;font-size:26px;font-weight:600;letter-spacing:-.2px}
+  header p{margin:6px 0 0;color:var(--muted);max-width:900px}
+  .legend{display:flex;gap:18px;margin-top:12px;font-size:12px;color:var(--muted)}
+  .legend span::before{content:"";display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-2px;border:1px solid var(--line)}
+  .legend .app::before{background:var(--surface)} .legend .os::before{background:var(--sys)}
+  h2.row{margin:28px 40px 0;font-size:15px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+  .flow{display:flex;gap:22px;padding:14px 40px 8px;overflow-x:auto;align-items:flex-start}
+  .step{flex:0 0 300px}
+  .cap{font-size:12px;color:var(--muted);margin:10px 4px 0}
+  .cap b{color:var(--ink);display:block;font-size:13px;margin-bottom:2px}
+  .arrow{flex:0 0 18px;align-self:center;color:#9aa0a6;font-size:22px;margin-top:-60px}
+
+  /* phone */
+  .phone{width:300px;height:620px;border-radius:30px;background:#2a2b2e;padding:10px;box-shadow:0 1px 0 #fff inset,0 8px 24px rgba(0,0,0,.12)}
+  .scr{position:relative;width:100%;height:100%;border-radius:22px;overflow:hidden;background:var(--surface);display:flex;flex-direction:column}
+  .scr.os{background:var(--sys)}
+  .status{height:24px;flex:0 0 24px;display:flex;justify-content:space-between;align-items:center;padding:0 16px;font-size:11px;color:var(--muted)}
+  .bar{display:flex;align-items:center;gap:12px;padding:6px 12px 6px 8px;min-height:52px}
+  .bar .ic{width:36px;height:36px;display:grid;place-items:center;border-radius:50%;color:var(--ink);font-size:18px}
+  .bar h3{margin:0;font-size:19px;font-weight:500;flex:1}
+  .large{padding:18px 20px 10px;font-size:26px;font-weight:400}
+  .body{flex:1;overflow:hidden;padding:0 0 12px}
+  .sub{padding:14px 20px 6px;font-size:12px;font-weight:600;color:var(--accent);letter-spacing:.2px}
+  .os .sub{color:var(--muted)}
+  .item{display:flex;align-items:center;gap:14px;padding:10px 20px;min-height:56px}
+  .item .t{flex:1;min-width:0}
+  .item .t div:first-child{font-size:15px}
+  .item .t div+div{font-size:12px;color:var(--muted)}
+  .av{width:40px;height:40px;border-radius:50%;background:var(--accentSoft);display:grid;place-items:center;color:var(--accent);font-weight:600;font-size:15px;flex:0 0 40px}
+  .cloud{width:40px;height:40px;border-radius:50%;background:#fff;border:1px solid var(--line);display:grid;place-items:center;flex:0 0 40px;font-size:18px}
+  .dot{width:14px;height:14px;border-radius:50%;flex:0 0 14px}
+  .chk{width:20px;height:20px;border-radius:4px;border:2px solid var(--muted);flex:0 0 20px}
+  .chk.on{background:var(--accent);border-color:var(--accent);position:relative}
+  .chk.on::after{content:"";position:absolute;left:5px;top:1px;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+  .sw{width:44px;height:26px;border-radius:13px;background:var(--surface2);border:2px solid var(--muted);position:relative;flex:0 0 44px}
+  .sw::after{content:"";position:absolute;width:14px;height:14px;border-radius:50%;background:var(--muted);left:4px;top:4px}
+  .sw.on{background:var(--accent);border-color:var(--accent)}
+  .sw.on::after{background:#fff;width:18px;height:18px;left:20px;top:2px}
+  .divider{height:1px;background:var(--line);margin:4px 20px}
+  .fab{position:absolute;right:16px;bottom:18px;background:var(--accentSoft);color:#0d3b63;border-radius:16px;padding:16px 18px;font-weight:500;display:flex;gap:10px;align-items:center;box-shadow:0 3px 8px rgba(0,0,0,.18)}
+  .field{margin:10px 20px;border:1px solid var(--muted);border-radius:4px;padding:16px 12px 10px;position:relative;font-size:15px}
+  .field label{position:absolute;top:-8px;left:10px;background:var(--surface);padding:0 4px;font-size:11px;color:var(--muted)}
+  .field.focus{border:2px solid var(--accent)} .field.focus label{color:var(--accent)}
+  .field .eye{position:absolute;right:12px;top:14px;color:var(--muted)}
+  .help{margin:2px 24px 0;font-size:12px;color:var(--muted)}
+  .link{color:var(--accent);font-weight:500}
+  .btns{display:flex;justify-content:flex-end;gap:8px;padding:18px 20px}
+  .btn{border-radius:20px;padding:10px 20px;font-weight:500;font-size:14px;white-space:nowrap}
+  .btn.filled{background:var(--accent);color:#fff}
+  .btn.text{color:var(--accent)}
+  .btn.tonal{background:var(--accentSoft);color:#0d3b63}
+  .btn.danger{color:var(--danger)}
+  .empty{padding:60px 32px 0;text-align:center;color:var(--muted)}
+  .empty .big{font-size:56px;opacity:.5}
+  .empty h4{color:var(--ink);font-size:18px;font-weight:500;margin:12px 0 6px}
+  .chip{display:inline-block;font-size:11px;padding:2px 8px;border-radius:8px;background:var(--surface2);color:var(--muted)}
+  .chip.ok{color:var(--ok)} .chip.err{color:var(--danger);background:#fbe9e7}
+  .scrim{position:absolute;inset:0;background:rgba(0,0,0,.38);display:flex;align-items:center;justify-content:center}
+  .dlg{background:#fff;border-radius:24px;width:250px;padding:22px 20px 10px;text-align:center}
+  .dlg .ico{font-size:26px;color:var(--accent)}
+  .dlg h5{font-size:17px;font-weight:400;margin:10px 0 18px;line-height:1.35}
+  .dlg .opt{padding:11px;color:var(--accent);font-weight:500;border-top:1px solid var(--line)}
+  .progress{height:4px;background:var(--accentSoft);margin:0 20px;border-radius:2px;overflow:hidden}
+  .progress i{display:block;height:100%;width:45%;background:var(--accent)}
+  .note{position:absolute;left:12px;right:12px;top:30px;background:#fff;border-radius:18px;padding:12px 14px;box-shadow:0 4px 14px rgba(0,0,0,.2);font-size:12px}
+  .note b{font-size:13px}
+  .ghost{opacity:.35}
+  .tag{position:absolute;right:10px;bottom:10px;font-size:10px;background:#fff8e1;border:1px solid #f0d68a;color:#7a5b00;padding:3px 7px;border-radius:6px}
+  .card{margin:8px 16px;background:var(--surface2);border-radius:16px;padding:14px 16px}
+  .card .row{display:flex;justify-content:space-between;align-items:center}
+  .seg{display:flex;margin:6px 20px;border:1px solid var(--muted);border-radius:20px;overflow:hidden;font-size:12px}
+  .seg span{flex:1;text-align:center;padding:8px 0;border-left:1px solid var(--muted)}
+  .seg span:first-child{border-left:0}
+  .seg .on{background:var(--accentSoft);font-weight:600}
+  footer{padding:24px 40px 48px;color:var(--muted);font-size:12px;max-width:1100px}
+  footer li{margin:4px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>Synccloud: wireframes v1</h1>
+  <p>Synccloud handles setup only. Events and contacts live in the standard Calendar and Contacts apps. Material 3 structure throughout; colour here is a placeholder, and the real app uses the device's dynamic colour.</p>
+  <div class="legend"><span class="app">Synccloud screen</span><span class="os">Android system screen (owned by the OS, shown for context)</span></div>
+</header>
+
+<h2 class="row">A · First run: add an iCloud account</h2>
+<div class="flow">
+
+  <!-- A1 empty -->
+  <div class="step">
+    <div class="phone"><div class="scr">
+      <div class="status"><span>9:41</span><span>▾ ▴ ▮</span></div>
+      <div class="large">iCloud accounts</div>
+      <div class="body">
+        <div class="empty">
+          <div class="big">☁</div>
+          <h4>No accounts yet</h4>
+          <div>Add your Apple ID to sync iCloud calendars and contacts with this phone.</div>
+          <div style="margin-top:14px">You'll need an <span class="link">app-specific password</span>.</div>
+        </div>
+      </div>
+      <div class="fab">＋ Add account</div>
+    </div></div>
+    <div class="cap"><b>A1 · Launch (empty)</b>The only thing the app asks for at this point is an account. There's no onboarding carousel.</div>
+  </div>
+  <div class="arrow">→</div>
+
+  <!-- A2 sign in -->
+  <div class="step">
+    <div class="phone"><div class="scr">
+      <div class="status"><span>9:41</span><span>▾ ▴ ▮</span></div>
+      <div class="bar"><div class="ic">✕</div><h3>Add iCloud account</h3></div>
+      <div class="body">
+        <div class="field"><label>Apple ID (email)</label>andrew@icloud.com</div>
+        <div class="field focus"><label>App-specific password</label>•••• •••• •••• ••••<span class="eye">◉</span></div>
+        <div class="help">This isn't your Apple ID password. Create one at appleid.apple.com → Sign-In and Security → App-Specific Passwords.</div>
+        <div class="help" style="margin-top:8px"><span class="link">How do I get one? ↗</span></div>
+        <div class="btns" style="margin-top:12px"><span class="btn text">Cancel</span><span class="btn filled">Sign in</span></div>
+      </div>
+    </div></div>
+    <div class="cap"><b>A2 · Sign in</b>Two fields. The link opens Apple's support page in a Custom Tab. The password field accepts pasted text with or without dashes.</div>
+  </div>
+  <div class="arrow">→</div>
+
+  <!-- A3 discovering -->
+  <div class="step">
+    <div class="phone"><div class="scr">
+      <div class="status"><span>9:41</span><span>▾ ▴ ▮</span></div>
+      <div class="bar"><div class="ic">✕</div><h3>Add iCloud account</h3></div>
+      <div class="progress"><i></i></div>
+      <div class="body">
+        <div class="field ghost"><label>Apple ID (email)</label>andrew@icloud.com</div>
+        <div class="field ghost"><label>App-specific password</label>•••• •••• •••• ••••</div>
+        <div class="help">Finding your calendars and contacts…</div>
+        <div class="divider" style="margin-top:24px"></div>
+        <div class="help" style="color:var(--danger);margin-top:12px"><b>Error variant:</b> "Apple didn't accept that password. Check it's an app-specific password and try again." The password field is highlighted.</div>
+      </div>
+    </div></div>
+    <div class="cap"><b>A3 · Verifying</b>Signs in to caldav/contacts.icloud.com and finds the account's calendars and address book. Errors appear inline, never in a dialog.</div>
+  </div>
+  <div class="arrow">→</div>
+
+  <!-- A4 choose -->
+  <div class="step">
+    <div class="phone"><div class="scr">
+      <div class="status"><span>9:41</span><span>▾ ▴ ▮</span></div>
+      <div class="bar"><div class="ic">✕</div><h3>Choose what to sync</h3></div>
+      <div class="body">
+        <div class="sub">CALENDARS</div>
+        <div class="item"><span class="dot" style="background:#3b82c4"></span><div class="t"><div>Home</div></div><span class="chk on"></span></div>
+        <div class="item"><span class="dot" style="background:#d9534f"></span><div class="t"><div>Work</div></div><span class="chk on"></span></div>
+        <div class="item"><span class="dot" style="background:#8a6d3b"></span><div class="t"><div>Family</div><div>Shared by Sarah · read-only</div></div><span class="chk on"></span></div>
+        <div class="item"><span class="dot" style="background:#5cb85c"></span><div class="t"><div>Birthdays</div><div>Subscribed · read-only</div></div><span class="chk"></span></div>
+        <div class="sub">CONTACTS</div>
+        <div class="item"><div class="t"><div>iCloud contacts</div><div>412 contacts · 6 groups</div></div><span class="sw on"></span></div>
+        <div class="btns"><span class="btn filled">Done</span></div>
+      </div>
+    </div></div>
+    <div class="cap"><b>A4 · Choose what to sync</b>Calendar names and colours come from iCloud. Everything is on by default except subscribed calendars. iCloud has one address book per Apple ID, so contacts are a single switch.</div>
+  </div>
+  <div class="arrow">→</div>
+
+  <!-- A5 permissions -->
+  <div class="step">
+    <div class="phone"><div class="scr">
+      <div class="status"><span>9:41</span><span>▾ ▴ ▮</span></div>
+      <div class="large ghost">iCloud accounts</div>
+      <div class="scrim"><div class="dlg">
+        <div class="ico">▦</div>
+        <h5>Allow <b>Synccloud</b> to access your calendar?</h5>
+        <div class="opt">Allow</div><div class="opt">Don't allow</div>
+      </div></div>
+      <div class="tag">system dialog</div>
+    </div></div>
+    <div class="cap"><b>A5 · Permissions</b>The standard runtime prompts appear only for what you picked (Calendar, then Contacts). After that, Synccloud asks once to be excluded from battery optimisation so background sync stays reliable.</div>
+  </div>
+</div>
+
+<h2 class="row">B · Day-to-day: manage accounts</h2>
+<div class="flow">
+
+  <!-- B1 accounts list -->
+  <div class="step">
+    <div class="phone"><div class="scr">
+      <div class="status"><span>9:41</span><span>▾ ▴ ▮</span></div>
+      <div class="large">iCloud accounts</div>
+      <div class="body">
+        <div class="item"><div class="av">A</div><div class="t"><div>andrew@icloud.com</div><div>3 calendars · Contacts · <span class="chip ok">Synced 2 min ago</span></div></div></div>
+        <div class="item"><div class="av">F</div><div class="t"><div>family@me.com</div><div>1 calendar · <span class="chip err">Password needed</span></div></div></div>
+      </div>
+      <div class="fab">＋ Add account</div>
+    </div></div>
+    <div class="cap"><b>B1 · Accounts</b>One row per Apple ID, each with a single status line. Tapping a row opens B2. Multiple accounts are supported.</div>
+  </div>
+  <div class="arrow">→</div>
+
+  <!-- B2 account detail -->
+  <div class="step">
+    <div class="phone"><div class="scr">
+      <div class="status"><span>9:41</span><span>▾ ▴ ▮</span></div>
+      <div class="bar"><div class="ic">←</div><h3>andrew@icloud.com</h3><div class="ic">⋮</div></div>
+      <div class="body">
+        <div class="card"><div class="row"><div><div>Last synced 2 min ago</div><div style="font-size:12px;color:var(--muted)">Next sync in about 1 hour</div></div><span class="btn tonal">Sync now</span></div></div>
+        <div class="sub">CALENDARS</div>
+        <div class="item"><span class="dot" style="background:#3b82c4"></span><div class="t"><div>Home</div></div><span class="sw on"></span></div>
+        <div class="item"><span class="dot" style="background:#d9534f"></span><div class="t"><div>Work</div></div><span class="sw on"></span></div>
+        <div class="item"><span class="dot" style="background:#8a6d3b"></span><div class="t"><div>Family</div></div><span class="sw on"></span></div>
+        <div class="item"><span class="dot" style="background:#5cb85c"></span><div class="t"><div>Birthdays</div></div><span class="sw"></span></div>
+        <div class="sub">CONTACTS</div>
+        <div class="item"><div class="t"><div>iCloud contacts</div><div>412 contacts</div></div><span class="sw on"></span></div>
+        <div class="sub">SYNC</div>
+        <div class="item"><div class="t"><div>Sync interval</div><div>Every hour</div></div></div>
+      </div>
+    </div></div>
+    <div class="cap"><b>B2 · Account settings</b>This screen opens both from the app and from Settings → Accounts → iCloud. The ⋮ menu has <i>Change password</i> and <i>Remove account</i>. Turning a calendar off removes its local copy; nothing on iCloud is deleted.</div>
+  </div>
+  <div class="arrow">→</div>
+
+  <!-- B3 interval -->
+  <div class="step">
+    <div class="phone"><div class="scr">
+      <div class="status"><span>9:41</span><span>▾ ▴ ▮</span></div>
+      <div class="bar ghost"><div class="ic">←</div><h3>andrew@icloud.com</h3></div>
+      <div class="scrim" style="align-items:flex-end;justify-content:stretch">
+        <div style="background:#fff;width:100%;border-radius:24px 24px 0 0;padding:10px 0 18px">
+          <div style="width:32px;height:4px;border-radius:2px;background:var(--line);margin:4px auto 12px"></div>
+          <div class="sub" style="color:var(--ink);font-size:16px;font-weight:500;padding-top:4px">Sync interval</div>
+          <div class="item" style="min-height:44px"><div class="t"><div>Every 15 minutes</div></div></div>
+          <div class="item" style="min-height:44px"><div class="t"><div><b>Every hour</b> (recommended)</div></div><span class="link">✓</span></div>
+          <div class="item" style="min-height:44px"><div class="t"><div>Every 4 hours</div></div></div>
+          <div class="item" style="min-height:44px"><div class="t"><div>Only when I tap Sync now</div></div></div>
+          <div class="help">Changes you make on this phone are uploaded right away.</div>
+        </div>
+      </div>
+    </div></div>
+    <div class="cap"><b>B3 · The only real setting</b>This sets how often Synccloud checks iCloud. Wi-Fi-only, conflict handling and similar options are deliberately left out.</div>
+  </div>
+  <div class="arrow">→</div>
+
+  <!-- B4 reauth notification -->
+  <div class="step">
+    <div class="phone"><div class="scr os">
+      <div class="status"><span>9:41</span><span>▾ ▴ ▮</span></div>
+      <div class="note"><b>☁ Synccloud · family@me.com</b><div style="margin-top:4px">iCloud stopped accepting the password. Tap to enter a new app-specific password.</div><div style="margin-top:8px;color:var(--accent);font-weight:500">RE-ENTER PASSWORD</div></div>
+      <div class="tag">system notification</div>
+    </div></div>
+    <div class="cap"><b>B4 · The only notification</b>Synccloud only notifies you when you need to do something, for example when a revoked password stops sync. There are no "sync complete" messages.</div>
+  </div>
+</div>
+
+<h2 class="row">C · How it looks in Android (no Synccloud UI involved)</h2>
+<div class="flow">
+
+  <!-- C1 settings accounts -->
+  <div class="step">
+    <div class="phone"><div class="scr os">
+      <div class="status"><span>9:41</span><span>▾ ▴ ▮</span></div>
+      <div class="bar"><div class="ic">←</div><h3>Manage accounts</h3></div>
+      <div class="body">
+        <div class="item"><div class="av" style="background:#fff;border:1px solid var(--line);color:#4285f4">G</div><div class="t"><div>andrew@gmail.com</div><div>Google</div></div></div>
+        <div class="item"><div class="av" style="background:#fff;border:1px solid var(--line);color:#1428a0">S</div><div class="t"><div>andrew@…</div><div>Samsung account</div></div></div>
+        <div class="item"><div class="cloud">☁</div><div class="t"><div>andrew@icloud.com</div><div><b>iCloud</b></div></div></div>
+        <div class="item"><div class="cloud">☁</div><div class="t"><div>family@me.com</div><div><b>iCloud</b></div></div></div>
+        <div class="item ghost"><div class="av">＋</div><div class="t"><div>Add account</div></div></div>
+      </div>
+      <div class="tag">Settings → Accounts</div>
+    </div></div>
+    <div class="cap"><b>C1 · Settings → Accounts</b>Each iCloud login is a real Android account, listed next to Google and Samsung. <i>Add account → iCloud</i> here opens A2.</div>
+  </div>
+  <div class="arrow">→</div>
+
+  <!-- C2 account sync -->
+  <div class="step">
+    <div class="phone"><div class="scr os">
+      <div class="status"><span>9:41</span><span>▾ ▴ ▮</span></div>
+      <div class="bar"><div class="ic">←</div><h3>andrew@icloud.com</h3></div>
+      <div class="body">
+        <div class="item"><div class="t"><div>Sync account</div><div>Calendar, Contacts</div></div><span style="color:var(--muted)">›</span></div>
+        <div class="item"><div class="t"><div>Account settings</div><div>Opens Synccloud (B2)</div></div><span style="color:var(--muted)">›</span></div>
+        <div class="divider"></div>
+        <div class="sub">SYNC ACCOUNT</div>
+        <div class="item"><div class="t"><div>Calendar</div><div>Last synced 9:39</div></div><span class="sw on"></span></div>
+        <div class="item"><div class="t"><div>Contacts</div><div>Last synced 9:39</div></div><span class="sw on"></span></div>
+        <div class="btns" style="justify-content:space-between"><span class="btn text">Sync now</span><span class="btn danger">Remove account</span></div>
+      </div>
+      <div class="tag">Settings → Accounts → iCloud</div>
+    </div></div>
+    <div class="cap"><b>C2 · System sync controls</b>The OS provides these because Synccloud registers proper sync adapters. Calendar and Contacts switches work the same as for Google.</div>
+  </div>
+  <div class="arrow">→</div>
+
+  <!-- C3 calendar app -->
+  <div class="step">
+    <div class="phone"><div class="scr os">
+      <div class="status"><span>9:41</span><span>▾ ▴ ▮</span></div>
+      <div class="bar"><div class="ic">←</div><h3>Manage calendars</h3></div>
+      <div class="body">
+        <div class="sub">ANDREW@GMAIL.COM</div>
+        <div class="item"><span class="dot" style="background:#039be5"></span><div class="t"><div>Andrew</div></div><span class="chk on"></span></div>
+        <div class="sub">ANDREW@ICLOUD.COM · ICLOUD</div>
+        <div class="item"><span class="dot" style="background:#3b82c4"></span><div class="t"><div>Home</div></div><span class="chk on"></span></div>
+        <div class="item"><span class="dot" style="background:#d9534f"></span><div class="t"><div>Work</div></div><span class="chk on"></span></div>
+        <div class="item"><span class="dot" style="background:#8a6d3b"></span><div class="t"><div>Family</div></div><span class="chk on"></span></div>
+      </div>
+      <div class="tag">Samsung / Google Calendar</div>
+    </div></div>
+    <div class="cap"><b>C3 · Calendar app</b>iCloud calendars appear under their account in any calendar app, and new events can be saved to them.</div>
+  </div>
+  <div class="arrow">→</div>
+
+  <!-- C4 whatsapp/contacts -->
+  <div class="step">
+    <div class="phone"><div class="scr os">
+      <div class="status"><span>9:41</span><span>▾ ▴ ▮</span></div>
+      <div class="bar"><div class="ic">←</div><h3>Select contact</h3><div class="ic">⌕</div></div>
+      <div class="body">
+        <div class="item"><div class="av">S</div><div class="t"><div>Sarah Gribben</div><div>Hey there! I am using WhatsApp.</div></div></div>
+        <div class="item"><div class="av">J</div><div class="t"><div>James (iCloud only)</div><div>Available</div></div></div>
+        <div class="item"><div class="av">M</div><div class="t"><div>Mum</div><div>Busy</div></div></div>
+      </div>
+      <div class="tag">WhatsApp / Contacts</div>
+    </div></div>
+    <div class="cap"><b>C4 · Third-party apps</b>Contacts are written through a <code>ContactsContract</code> sync adapter, and the account is marked visible, so WhatsApp, Signal and dialers see them. This is the acceptance test for the Outlook problem.</div>
+  </div>
+</div>
+
+<footer>
+  <b>Design rules</b>
+  <ul>
+    <li>Three app screens only: Accounts, Add account, Account settings. Everything else is handled by Android.</li>
+    <li>Material 3, dynamic colour, edge-to-edge, predictive back. Light and dark themes come from the system.</li>
+    <li>No in-app view of events or contacts. No sync log in the main UI (a debug log export sits behind ⋮ → About).</li>
+    <li>Removing an account, whether in the app or in Settings, deletes local copies only. Nothing is deleted on iCloud.</li>
+  </ul>
+</footer>
+</body>
+</html>
