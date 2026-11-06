@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<multistatus xmlns="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav" xmlns:CS="http://calendarserver.org/ns/" xmlns:A="http://apple.com/ns/ical/">
+  <!-- the home set itself -->
+  <response>
+    <href>/1234567/calendars/</href>
+    <propstat>
+      <prop>
+        <resourcetype><collection/></resourcetype>
+      </prop>
+      <status>HTTP/1.1 200 OK</status>
+    </propstat>
+  </response>
+  <!-- own, writable event calendar -->
+  <response>
+    <href>/1234567/calendars/home/</href>
+    <propstat>
+      <prop>
+        <resourcetype><collection/><C:calendar/></resourcetype>
+        <displayname>Home</displayname>
+        <A:calendar-color>#3B82C4FF</A:calendar-color>
+        <C:supported-calendar-component-set><C:comp name="VEVENT"/></C:supported-calendar-component-set>
+        <current-user-privilege-set>
+          <privilege><read/></privilege>
+          <privilege><write/></privilege>
+        </current-user-privilege-set>
+      </prop>
+      <status>HTTP/1.1 200 OK</status>
+    </propstat>
+  </response>
+  <!-- iCloud Reminders list (VTODO only): must be skipped -->
+  <response>
+    <href>/1234567/calendars/tasks/</href>
+    <propstat>
+      <prop>
+        <resourcetype><collection/><C:calendar/></resourcetype>
+        <displayname>Reminders</displayname>
+        <A:calendar-color>#FF9500FF</A:calendar-color>
+        <C:supported-calendar-component-set><C:comp name="VTODO"/></C:supported-calendar-component-set>
+        <current-user-privilege-set>
+          <privilege><read/></privilege>
+          <privilege><write/></privilege>
+        </current-user-privilege-set>
+      </prop>
+      <status>HTTP/1.1 200 OK</status>
+    </propstat>
+  </response>
+  <!-- calendar shared with us read-only -->
+  <response>
+    <href>/1234567/calendars/family/</href>
+    <propstat>
+      <prop>
+        <resourcetype><collection/><C:calendar/><CS:shared/></resourcetype>
+        <displayname>Family</displayname>
+        <A:calendar-color>#8A6D3BFF</A:calendar-color>
+        <C:supported-calendar-component-set><C:comp name="VEVENT"/><C:comp name="VTODO"/></C:supported-calendar-component-set>
+        <current-user-privilege-set>
+          <privilege><read/></privilege>
+        </current-user-privilege-set>
+      </prop>
+      <status>HTTP/1.1 200 OK</status>
+    </propstat>
+  </response>
+  <!-- subscribed (webcal) calendar -->
+  <response>
+    <href>/1234567/calendars/birthdays/</href>
+    <propstat>
+      <prop>
+        <resourcetype><collection/><CS:subscribed/></resourcetype>
+        <displayname>Birthdays</displayname>
+        <A:calendar-color>#5CB85CFF</A:calendar-color>
+        <C:supported-calendar-component-set><C:comp name="VEVENT"/></C:supported-calendar-component-set>
+        <current-user-privilege-set>
+          <privilege><read/></privilege>
+        </current-user-privilege-set>
+      </prop>
+      <status>HTTP/1.1 200 OK</status>
+    </propstat>
+  </response>
+  <!-- scheduling inbox: not a calendar -->
+  <response>
+    <href>/1234567/calendars/inbox/</href>
+    <propstat>
+      <prop>
+        <resourcetype><collection/><C:schedule-inbox/></resourcetype>
+      </prop>
+      <status>HTTP/1.1 200 OK</status>
+    </propstat>
+  </response>
+</multistatus>
