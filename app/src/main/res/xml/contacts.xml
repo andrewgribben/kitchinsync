@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lets Contacts apps offer this account as a place to save new contacts -->
+<ContactsAccountType xmlns:android="http://schemas.android.com/apk/res/android" />
