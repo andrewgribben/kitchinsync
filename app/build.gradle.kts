@@ -19,6 +19,10 @@ android {
     buildFeatures {
         compose = true
     }
+
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+    }
 }
 
 kotlin {
@@ -41,6 +45,8 @@ dependencies {
     }
     implementation(libs.ktor.client.okhttp)
     implementation(libs.kotlinx.serialization.json)
+    implementation(project(":synctools"))
+    coreLibraryDesugaring(libs.android.desugaring)
 
     // JVM unit tests have no platform XmlPullParser, so they get dav4jvm's xpp3 back
     testImplementation(libs.dav4jvm)
