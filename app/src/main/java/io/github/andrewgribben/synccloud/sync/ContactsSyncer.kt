@@ -47,10 +47,17 @@ class ContactsSyncer(
     private val generator = VCardGenerator(VCardVersion.V3_0, includeTrailingSemicolons = true)
 
     /**
-     * @param addressBookUrl    the account's single iCloud address book, or null if contacts sync is off
-     *                          (in which case all local contacts/groups for this account are removed)
+     * @param addressBookUrl    the account's single iCloud address book, or null if iCloud has none
+     * @param enabled           whether contacts sync is switched on; when false, any pending local
+     *                          edits are uploaded first (best effort), then all local contacts/groups
+     *                          for this account are removed
      */
-    fun sync(addressBookUrl: String?, syncResult: SyncResult) {
+    fun sync(addressBookUrl: String?, enabled: Boolean, syncResult: SyncResult) {
+        if (!enabled) {
+            if (addressBookUrl != null) uploadPendingChangesBeforeRemoval(Url(addressBookUrl))
+            removeAllLocalContacts()
+            return
+        }
         if (addressBookUrl == null) {
             removeAllLocalContacts()
             return
@@ -66,6 +73,15 @@ class ContactsSyncer(
         } catch (e: Exception) {
             syncResult.stats.numParseExceptions++
             logger.warning("Error syncing contacts: ${e.message}")
+        }
+    }
+
+    /** Best-effort upload of dirty/deleted contacts before [removeAllLocalContacts] wipes the local copy. */
+    private fun uploadPendingChangesBeforeRemoval(addressBookUrl: Url) {
+        try {
+            uploadLocalChanges(RemoteAddressBookSync(httpClient, addressBookUrl))
+        } catch (e: Exception) {
+            logger.warning("Could not upload pending local contacts before disabling sync: ${e.message}")
         }
     }
 

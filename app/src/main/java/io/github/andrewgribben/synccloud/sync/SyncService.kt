@@ -49,7 +49,7 @@ private class SyncAdapter(context: Context) : AbstractThreadedSyncAdapter(contex
                     if (PermissionChecker.checkSelfPermission(context, android.Manifest.permission.WRITE_CONTACTS) != PermissionChecker.PERMISSION_GRANTED) return
                     val contactsEnabled = accounts.isSyncEnabled(account, ContactsContract.AUTHORITY)
                     ContactsSyncer(account, context, provider, client)
-                        .sync(if (contactsEnabled) accounts.addressBookUrl(account) else null, syncResult)
+                        .sync(accounts.addressBookUrl(account), contactsEnabled, syncResult)
                 }
             }
             accounts.setLastSynced(account, System.currentTimeMillis())
