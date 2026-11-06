@@ -20,3 +20,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "synccloud"
 include(":app")
+include(":synctools")
+project(":synctools").projectDir = file("third_party/synctools")
