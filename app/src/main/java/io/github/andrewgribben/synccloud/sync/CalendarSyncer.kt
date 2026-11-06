@@ -75,6 +75,12 @@ class CalendarSyncer(
 
         for (local in existing) {
             val url = local.name
+            if (url != null && url !in wantedByUrl) {
+                // Turning a calendar off (or it disappearing from the choice list) must not silently
+                // discard events the user created/edited locally but hasn't uploaded yet.
+                val readOnly = choices.firstOrNull { it.url == url }?.readOnly ?: false
+                if (!readOnly) uploadPendingChangesBeforeRemoval(local, url)
+            }
             if (url == null || url !in wantedByUrl)
                 local.delete() // disabled or removed on server: local-only deletion, never touches iCloud
         }
@@ -95,6 +101,17 @@ class CalendarSyncer(
             )
             val existingLocal = existing.firstOrNull { it.name == choice.url }
             if (existingLocal != null) existingLocal.update(values) else calendarProvider.createCalendar(values)
+        }
+    }
+
+    /** Best-effort upload of dirty/deleted events before [reconcileCalendars] drops the local calendar. */
+    private fun uploadPendingChangesBeforeRemoval(local: AndroidCalendar, url: String) {
+        try {
+            runBlocking {
+                uploadLocalChanges(local, AndroidRecurringCalendar(local), RemoteCalendarSync(httpClient, Url(url)))
+            }
+        } catch (e: Exception) {
+            logger.warning("Could not upload pending local changes before removing calendar $url: ${e.message}")
         }
     }
 
