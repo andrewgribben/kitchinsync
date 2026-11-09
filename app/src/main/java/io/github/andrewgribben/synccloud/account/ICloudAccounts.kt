@@ -24,6 +24,7 @@ class ICloudAccounts(private val context: Context) {
         private const val KEY_ADDRESS_BOOK = "address_book_url"
         private const val KEY_LAST_SYNCED = "last_synced_millis"
         private const val KEY_LAST_SYNC_FAILED = "last_sync_failed"
+        private const val KEY_PHOTOS_MIGRATED = "photos_migrated"
         private const val KEY_STATUS = "status"
         const val STATUS_PASSWORD_NEEDED = "password_needed"
     }
@@ -74,6 +75,12 @@ class ICloudAccounts(private val context: Context) {
 
     fun setLastSyncFailed(account: Account, failed: Boolean) =
         manager.setUserData(account, KEY_LAST_SYNC_FAILED, if (failed) "1" else null)
+
+    /** Whether contacts have already had their one-time post-upgrade photo re-download (see [ContactsSyncer]). */
+    fun photosMigrated(account: Account): Boolean = manager.getUserData(account, KEY_PHOTOS_MIGRATED) == "1"
+
+    fun setPhotosMigrated(account: Account, migrated: Boolean) =
+        manager.setUserData(account, KEY_PHOTOS_MIGRATED, if (migrated) "1" else null)
 
     /** Null when everything is fine; [STATUS_PASSWORD_NEEDED] after a 401 from iCloud. */
     fun status(account: Account): String? = manager.getUserData(account, KEY_STATUS)

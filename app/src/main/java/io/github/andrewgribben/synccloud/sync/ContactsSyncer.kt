@@ -22,12 +22,33 @@ import at.bitfire.synctools.vcard.VCardGenerator
 import at.bitfire.synctools.vcard.VCardParser
 import ezvcard.VCardVersion
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.http.HttpHeaders
 import io.ktor.http.Url
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import java.io.StringReader
 import java.io.StringWriter
 import java.util.logging.Logger
+
+/**
+ * Downloads a vCard PHOTO's `https://pNN-contacts.icloud.com/...` URL using the account's
+ * authenticated client (iCloud serves photos as a separate Basic-auth request, not inline data).
+ * Mirrors DAVx5 core's PhotoDownloader.
+ */
+private class IcloudPhotoDownloader(private val httpClient: HttpClient) : Contact.Downloader {
+    private val logger = Logger.getLogger(javaClass.name)
+
+    override suspend fun download(url: String, accepts: String): ByteArray? = try {
+        val response = httpClient.get(url) { headers.append(HttpHeaders.Accept, accepts) }
+        if (response.status.isSuccess()) response.body<ByteArray>() else null
+    } catch (e: Exception) {
+        logger.warning("Could not download contact photo from $url: ${e.message}")
+        null
+    }
+}
 
 /**
  * Two-way CardDAV sync for one account's single address book. Groups are mapped to/from vCard4
@@ -45,14 +66,18 @@ class ContactsSyncer(
     private val addressBook = AndroidAddressBook(context, account, storage, GroupMethod.GROUP_VCARDS)
     private val parser = VCardParser()
     private val generator = VCardGenerator(VCardVersion.V3_0, includeTrailingSemicolons = true)
+    private val photoDownloader = IcloudPhotoDownloader(httpClient)
 
     /**
      * @param addressBookUrl    the account's single iCloud address book, or null if iCloud has none
      * @param enabled           whether contacts sync is switched on; when false, any pending local
      *                          edits are uploaded first (best effort), then all local contacts/groups
      *                          for this account are removed
+     * @param forcePhotoRedownload  re-downloads every contact's content once even if its ETag hasn't
+     *                          changed, so contacts synced before photo downloading existed get their
+     *                          photo too (see [ICloudAccounts.photosMigrated])
      */
-    fun sync(addressBookUrl: String?, enabled: Boolean, syncResult: SyncResult) {
+    fun sync(addressBookUrl: String?, enabled: Boolean, syncResult: SyncResult, forcePhotoRedownload: Boolean = false) {
         if (!enabled) {
             if (addressBookUrl != null) uploadPendingChangesBeforeRemoval(Url(addressBookUrl))
             removeAllLocalContacts()
@@ -64,7 +89,7 @@ class ContactsSyncer(
         }
 
         try {
-            runBlocking { syncAddressBook(Url(addressBookUrl)) }
+            runBlocking { syncAddressBook(Url(addressBookUrl), forcePhotoRedownload) }
         } catch (e: RemoteConflictException) {
             logger.info("Resolved contacts conflict: ${e.message}")
         } catch (e: java.io.IOException) {
@@ -92,12 +117,14 @@ class ContactsSyncer(
         batch.commit()
     }
 
-    private suspend fun syncAddressBook(collectionUrl: Url) {
+    private suspend fun syncAddressBook(collectionUrl: Url, forcePhotoRedownload: Boolean) {
         val remote = RemoteAddressBookSync(httpClient, collectionUrl)
 
         uploadLocalChanges(remote)
 
-        val lastState = RemoteSyncState.decode(bytesToString(addressBook.syncState))
+        // The forced resync always needs the full listing, since sync-collection would only
+        // report members that actually changed since the last token.
+        val lastState = if (forcePhotoRedownload) null else RemoteSyncState.decode(bytesToString(addressBook.syncState))
         when (SyncPlan.decide(lastState, syncTokenRejected = false)) {
             SyncPlan.SYNC_COLLECTION -> {
                 try {
@@ -105,16 +132,16 @@ class ContactsSyncer(
                     applyRemoteChanges(remote, result.changed.map { it.url }, result.removed.map { it.encodedPath.substringAfterLast('/') })
                     result.syncToken?.let { addressBook.syncState = RemoteSyncState.Token(it).encode().toByteArray() }
                 } catch (e: InvalidSyncTokenException) {
-                    fullListing(remote)
+                    fullListing(remote, forcePhotoRedownload)
                 }
             }
-            SyncPlan.FULL_LISTING -> fullListing(remote)
+            SyncPlan.FULL_LISTING -> fullListing(remote, forcePhotoRedownload)
         }
 
         resolvePendingGroupMemberships()
     }
 
-    private suspend fun fullListing(remote: RemoteAddressBookSync) {
+    private suspend fun fullListing(remote: RemoteAddressBookSync, forceAll: Boolean) {
         val remoteMembers = remote.listAll()
         val localETagsByFileName = mutableMapOf<String, String?>()
         addressBook.queryRawContactRows().toList().forEach { row ->
@@ -128,9 +155,7 @@ class ContactsSyncer(
             }
         }
 
-        val changedUrls = remoteMembers.filter { member ->
-            localETagsByFileName[member.url.encodedPath.substringAfterLast('/')] != member.eTag
-        }.map { it.url }
+        val changedUrls = membersNeedingDownload(remoteMembers, localETagsByFileName, forceAll)
         val remoteFileNames = remoteMembers.map { it.url.encodedPath.substringAfterLast('/') }.toSet()
         val removedFileNames = localETagsByFileName.keys - remoteFileNames
 
@@ -148,7 +173,7 @@ class ContactsSyncer(
             for (content in remote.download(batch)) {
                 val fileName = content.url.encodedPath.substringAfterLast('/')
                 val vCard = parser.parse(StringReader(content.body)) ?: continue
-                val contact = ContactReader.fromVCard(vCard)
+                val contact = ContactReader.fromVCard(vCard, photoDownloader)
 
                 if (contact.group) {
                     val existing = findGroup(fileName)

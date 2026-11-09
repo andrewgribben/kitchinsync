@@ -42,8 +42,10 @@ private class SyncAdapter(context: Context) : AbstractThreadedSyncAdapter(contex
                 ContactsContract.AUTHORITY -> {
                     if (PermissionChecker.checkSelfPermission(context, android.Manifest.permission.WRITE_CONTACTS) != PermissionChecker.PERMISSION_GRANTED) return
                     val contactsEnabled = accounts.isSyncEnabled(account, ContactsContract.AUTHORITY)
+                    val forcePhotoResync = contactsEnabled && !accounts.photosMigrated(account)
                     ContactsSyncer(account, context, provider, client)
-                        .sync(accounts.addressBookUrl(account), contactsEnabled, syncResult)
+                        .sync(accounts.addressBookUrl(account), contactsEnabled, syncResult, forcePhotoResync)
+                    if (forcePhotoResync && !syncResult.hasError()) accounts.setPhotosMigrated(account, true)
                 }
             }
             // Only report success (and clear any error status) when this sync didn't swallow an

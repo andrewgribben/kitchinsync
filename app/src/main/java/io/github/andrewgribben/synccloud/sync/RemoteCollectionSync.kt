@@ -75,6 +75,20 @@ suspend fun collectListing(flow: kotlinx.coroutines.flow.Flow<MultiStatusItem>):
             item.response[GetETag::class.java]?.eTag?.let { eTag -> RemoteMember(item.response.href, eTag) }
         }
 
+/**
+ * Which full-listing members actually need their content downloaded: those whose ETag changed
+ * since last sync, or every one of them when [forceAll] is set (used for the one-time contact
+ * photo migration: an unchanged ETag would otherwise skip contacts whose vCard was already
+ * synced before photo downloading existed).
+ */
+fun membersNeedingDownload(
+    remoteMembers: List<RemoteMember>,
+    localETagsByFileName: Map<String, String?>,
+    forceAll: Boolean = false,
+): List<Url> = remoteMembers
+    .filter { forceAll || localETagsByFileName[it.url.encodedPath.substringAfterLast('/')] != it.eTag }
+    .map { it.url }
+
 /** Checks a conditional PUT/DELETE's response and turns a 412 into [RemoteConflictException]. */
 suspend fun <T> runConditional(block: suspend () -> T): T =
     try {
