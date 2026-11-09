@@ -17,7 +17,21 @@ import io.github.andrewgribben.synccloud.icloud.icloudHttpClient
 import java.io.IOException
 import java.util.logging.Logger
 
+/** Wires java.util.logging (used throughout the app and the vendored synctools) to logcat. Without this,
+ *  every logger.warning()/log() call is silently dropped: Android installs no default JUL handler. */
+private fun installLogcatLoggingOnce() {
+    val root = Logger.getLogger("")
+    if (root.handlers.none { it is at.bitfire.synctools.log.LogcatHandler }) {
+        root.addHandler(at.bitfire.synctools.log.LogcatHandler())
+        root.level = java.util.logging.Level.INFO
+    }
+}
+
 private class SyncAdapter(context: Context) : AbstractThreadedSyncAdapter(context, true) {
+    init {
+        installLogcatLoggingOnce()
+    }
+
     private val logger = Logger.getLogger(javaClass.name)
     private val accounts = ICloudAccounts(context)
 

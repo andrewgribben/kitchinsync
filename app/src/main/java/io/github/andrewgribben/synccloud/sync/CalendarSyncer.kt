@@ -56,16 +56,16 @@ class CalendarSyncer(
             ) ?: continue
             SyncProgress.update(account.name, SyncProgress.Phase.CALENDARS, choice.displayName, index, enabled.size)
             try {
-                runBlocking { syncCalendar(local, choice) }
+                runBlocking { syncCalendar(local, choice, syncResult) }
             } catch (e: RemoteConflictException) {
                 // already resolved (server wins, we re-fetched) - nothing more to count as an error
                 logger.info("Resolved conflict in calendar ${choice.url}: ${e.message}")
             } catch (e: java.io.IOException) {
                 syncResult.stats.numIoExceptions++
-                logger.warning("I/O error syncing calendar ${choice.url}: ${e.message}")
+                logger.log(java.util.logging.Level.WARNING, "I/O error syncing calendar ${choice.url}", e)
             } catch (e: Exception) {
                 syncResult.stats.numParseExceptions++
-                logger.warning("Error syncing calendar ${choice.url}: ${e.message}")
+                logger.log(java.util.logging.Level.WARNING, "Error syncing calendar ${choice.url}", e)
             }
         }
     }
@@ -117,7 +117,7 @@ class CalendarSyncer(
         }
     }
 
-    private suspend fun syncCalendar(local: AndroidCalendar, choice: Calendar) {
+    private suspend fun syncCalendar(local: AndroidCalendar, choice: Calendar, syncResult: SyncResult) {
         val remote = RemoteCalendarSync(httpClient, Url(choice.url))
         val recurring = AndroidRecurringCalendar(local)
 
@@ -129,18 +129,24 @@ class CalendarSyncer(
             SyncPlan.SYNC_COLLECTION -> {
                 try {
                     val result = remote.listChanges((lastState as RemoteSyncState.Token).value)
-                    applyRemoteChanges(local, recurring, remote, result.changed.map { it.url }, result.removed, choice.displayName)
+                    applyRemoteChanges(local, recurring, remote, result.changed.map { it.url }, result.removed, choice.displayName, syncResult)
                     result.syncToken?.let { local.writeSyncState(RemoteSyncState.Token(it).encode()) }
                 } catch (e: InvalidSyncTokenException) {
-                    fullListing(local, recurring, remote, choice.displayName)
+                    fullListing(local, recurring, remote, choice.displayName, syncResult)
                 }
             }
-            SyncPlan.FULL_LISTING -> fullListing(local, recurring, remote, choice.displayName)
+            SyncPlan.FULL_LISTING -> fullListing(local, recurring, remote, choice.displayName, syncResult)
         }
     }
 
     /** CTag/ETag-comparison fallback: lists every remote member, compares to locally stored ETags. */
-    private suspend fun fullListing(local: AndroidCalendar, recurring: AndroidRecurringCalendar, remote: RemoteCalendarSync, displayName: String) {
+    private suspend fun fullListing(
+        local: AndroidCalendar,
+        recurring: AndroidRecurringCalendar,
+        remote: RemoteCalendarSync,
+        displayName: String,
+        syncResult: SyncResult,
+    ) {
         val remoteMembers = remote.listAll()
         val localETagsByFileName = mutableMapOf<String, Pair<Long, String?>>() // fileName -> (id, eTag)
         local.iterateEventRows(
@@ -159,7 +165,7 @@ class CalendarSyncer(
         val remoteFileNames = remoteMembers.map { it.url.encodedPath.substringAfterLast('/') }.toSet()
         val removedFileNames = localETagsByFileName.keys - remoteFileNames
 
-        applyRemoteChanges(local, recurring, remote, changedUrls, emptyList(), displayName)
+        applyRemoteChanges(local, recurring, remote, changedUrls, emptyList(), displayName, syncResult)
         for (fileName in removedFileNames)
             localETagsByFileName[fileName]?.first?.let { recurring.deleteEventAndExceptions(it) }
     }
@@ -171,6 +177,7 @@ class CalendarSyncer(
         changedUrls: List<Url>,
         removedUrls: List<Url>,
         displayName: String,
+        syncResult: SyncResult,
     ) {
         for (url in removedUrls) {
             val fileName = url.encodedPath.substringAfterLast('/')
@@ -182,19 +189,29 @@ class CalendarSyncer(
         var downloaded = 0
         for (batch in changedUrls.chunked(MULTIGET_BATCH_SIZE)) {
             for (content in remote.download(batch)) {
-                val fileName = content.url.encodedPath.substringAfterLast('/')
-                val calendar = parser.parse(StringReader(content.body))
-                val associated = splitter.associateByUid(calendar, "VEVENT").values.firstOrNull() ?: continue
-                val builder = AndroidEventBuilder(local, syncId = fileName, eTag = content.eTag, scheduleTag = null, flags = 0)
-                val built = builder.build(associated)
+                // One malformed resource must not take the rest of the calendar's events down with
+                // it (DAVx5 does the same): log it, count it as skipped (which, unlike numIoExceptions/
+                // numParseExceptions, does not make SyncResult.hasError() true, so a single bad event
+                // can't leave the account permanently stuck showing "not synced"), and move on. The
+                // sync token/ETags above still advance normally, so we won't keep re-downloading it.
+                try {
+                    val fileName = content.url.encodedPath.substringAfterLast('/')
+                    val calendar = parser.parse(StringReader(content.body))
+                    val associated = splitter.associateByUid(calendar, "VEVENT").values.firstOrNull() ?: continue
+                    val builder = AndroidEventBuilder(local, syncId = fileName, eTag = content.eTag, scheduleTag = null, flags = 0)
+                    val built = builder.build(associated)
 
-                val existing = recurring.findEventAndExceptions("${Events._SYNC_ID}=?", arrayOf(fileName))
-                val existingId = existing?.main?.entityValues?.getAsLong(Events._ID)
-                if (existingId != null)
-                    recurring.updateEventAndExceptions(existingId, built)
-                else
-                    recurring.addEventAndExceptions(built)
-                downloaded++
+                    val existing = recurring.findEventAndExceptions("${Events._SYNC_ID}=?", arrayOf(fileName))
+                    val existingId = existing?.main?.entityValues?.getAsLong(Events._ID)
+                    if (existingId != null)
+                        recurring.updateEventAndExceptions(existingId, built)
+                    else
+                        recurring.addEventAndExceptions(built)
+                    downloaded++
+                } catch (e: Exception) {
+                    syncResult.stats.numSkippedEntries++
+                    logger.log(java.util.logging.Level.WARNING, "Skipping unparsable event ${content.url}", e)
+                }
             }
             SyncProgress.update(account.name, SyncProgress.Phase.CALENDARS, displayName, downloaded, changedUrls.size)
         }
