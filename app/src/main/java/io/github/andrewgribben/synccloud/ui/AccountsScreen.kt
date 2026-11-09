@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import io.github.andrewgribben.synccloud.R
 import io.github.andrewgribben.synccloud.account.ICloudAccounts
+import io.github.andrewgribben.synccloud.sync.SyncProgress
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,9 +67,15 @@ fun AccountsScreen(accounts: ICloudAccounts, onAdd: () -> Unit, onOpen: (Account
         } else {
             LazyColumn(contentPadding = padding) {
                 items(list, key = { it.name }) { account ->
+                    val progress = syncProgressFor(account)
                     ListItem(
                         headlineContent = { Text(account.name) },
-                        supportingContent = { Text(status(accounts, account)) },
+                        supportingContent = {
+                            Column {
+                                Text(status(accounts, account, progress))
+                                if (progress != null) SyncProgressBar(progress)
+                            }
+                        },
                         leadingContent = { Icon(painterResource(R.drawable.ic_cloud), contentDescription = null) },
                         modifier = Modifier.clickable { onOpen(account) },
                     )
@@ -79,7 +86,8 @@ fun AccountsScreen(accounts: ICloudAccounts, onAdd: () -> Unit, onOpen: (Account
 }
 
 @Composable
-private fun status(accounts: ICloudAccounts, account: Account): String {
+private fun status(accounts: ICloudAccounts, account: Account, progress: SyncProgress.State?): String {
+    if (progress != null) return syncStatusText(accounts, account, progress)
     val calendars = accounts.calendars(account).count { it.enabled }
     val summary = listOfNotNull(
         pluralStringResource(R.plurals.calendar_count, calendars, calendars),

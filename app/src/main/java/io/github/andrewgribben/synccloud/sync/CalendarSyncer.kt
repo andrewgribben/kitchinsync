@@ -49,10 +49,12 @@ class CalendarSyncer(
     fun sync(choices: List<Calendar>, syncResult: SyncResult) {
         reconcileCalendars(choices)
 
-        for (choice in choices.filter { it.enabled }) {
+        val enabled = choices.filter { it.enabled }
+        for ((index, choice) in enabled.withIndex()) {
             val local = calendarProvider.findFirstCalendar(
                 "${Calendars.NAME}=?", arrayOf(choice.url)
             ) ?: continue
+            SyncProgress.update(account.name, SyncProgress.Phase.CALENDARS, choice.displayName, index, enabled.size)
             try {
                 runBlocking { syncCalendar(local, choice) }
             } catch (e: RemoteConflictException) {
@@ -127,18 +129,18 @@ class CalendarSyncer(
             SyncPlan.SYNC_COLLECTION -> {
                 try {
                     val result = remote.listChanges((lastState as RemoteSyncState.Token).value)
-                    applyRemoteChanges(local, recurring, remote, result.changed.map { it.url }, result.removed)
+                    applyRemoteChanges(local, recurring, remote, result.changed.map { it.url }, result.removed, choice.displayName)
                     result.syncToken?.let { local.writeSyncState(RemoteSyncState.Token(it).encode()) }
                 } catch (e: InvalidSyncTokenException) {
-                    fullListing(local, recurring, remote)
+                    fullListing(local, recurring, remote, choice.displayName)
                 }
             }
-            SyncPlan.FULL_LISTING -> fullListing(local, recurring, remote)
+            SyncPlan.FULL_LISTING -> fullListing(local, recurring, remote, choice.displayName)
         }
     }
 
     /** CTag/ETag-comparison fallback: lists every remote member, compares to locally stored ETags. */
-    private suspend fun fullListing(local: AndroidCalendar, recurring: AndroidRecurringCalendar, remote: RemoteCalendarSync) {
+    private suspend fun fullListing(local: AndroidCalendar, recurring: AndroidRecurringCalendar, remote: RemoteCalendarSync, displayName: String) {
         val remoteMembers = remote.listAll()
         val localETagsByFileName = mutableMapOf<String, Pair<Long, String?>>() // fileName -> (id, eTag)
         local.iterateEventRows(
@@ -157,7 +159,7 @@ class CalendarSyncer(
         val remoteFileNames = remoteMembers.map { it.url.encodedPath.substringAfterLast('/') }.toSet()
         val removedFileNames = localETagsByFileName.keys - remoteFileNames
 
-        applyRemoteChanges(local, recurring, remote, changedUrls, emptyList())
+        applyRemoteChanges(local, recurring, remote, changedUrls, emptyList(), displayName)
         for (fileName in removedFileNames)
             localETagsByFileName[fileName]?.first?.let { recurring.deleteEventAndExceptions(it) }
     }
@@ -168,6 +170,7 @@ class CalendarSyncer(
         remote: RemoteCalendarSync,
         changedUrls: List<Url>,
         removedUrls: List<Url>,
+        displayName: String,
     ) {
         for (url in removedUrls) {
             val fileName = url.encodedPath.substringAfterLast('/')
@@ -176,6 +179,7 @@ class CalendarSyncer(
         }
 
         if (changedUrls.isEmpty()) return
+        var downloaded = 0
         for (batch in changedUrls.chunked(MULTIGET_BATCH_SIZE)) {
             for (content in remote.download(batch)) {
                 val fileName = content.url.encodedPath.substringAfterLast('/')
@@ -190,7 +194,9 @@ class CalendarSyncer(
                     recurring.updateEventAndExceptions(existingId, built)
                 else
                     recurring.addEventAndExceptions(built)
+                downloaded++
             }
+            SyncProgress.update(account.name, SyncProgress.Phase.CALENDARS, displayName, downloaded, changedUrls.size)
         }
     }
 

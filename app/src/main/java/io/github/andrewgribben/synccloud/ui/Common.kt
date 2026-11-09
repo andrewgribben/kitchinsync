@@ -5,16 +5,20 @@ import android.accounts.Account
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -23,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import io.github.andrewgribben.synccloud.R
 import io.github.andrewgribben.synccloud.account.ICloudAccounts
 import io.github.andrewgribben.synccloud.icloud.Calendar
+import io.github.andrewgribben.synccloud.sync.SyncProgress
+import io.github.andrewgribben.synccloud.sync.fraction
 
 enum class SyncInterval(val seconds: Long?, @param:StringRes val label: Int) {
     FIFTEEN_MINUTES(15 * 60L, R.string.interval_15_min),
@@ -101,9 +107,33 @@ fun lastSyncedLabel(lastSyncedMillis: Long?): String {
 }
 
 /**
- * Last sync outcome for display: [accounts.lastSyncFailed] must win over [lastSyncedLabel] so the
- * UI never claims "Synced" for an attempt that actually recorded an I/O or auth error (see SyncService).
+ * One line summarising sync state: live progress while syncing, otherwise the last outcome.
+ * [accounts.lastSyncFailed] must win over [lastSyncedLabel] so the UI never claims "Synced" for
+ * an attempt that actually recorded an I/O or auth error (see SyncService).
  */
 @Composable
-fun syncStatusLine(accounts: ICloudAccounts, account: Account): String =
-    if (accounts.lastSyncFailed(account)) stringResource(R.string.sync_error) else lastSyncedLabel(accounts.lastSynced(account))
+fun syncStatusText(accounts: ICloudAccounts, account: Account, progress: SyncProgress.State?): String = when {
+    progress?.phase == SyncProgress.Phase.CALENDARS ->
+        if (progress.total != null) stringResource(R.string.syncing_calendars_progress, progress.label, progress.current + 1, progress.total)
+        else stringResource(R.string.syncing_calendars, progress.label)
+    progress?.phase == SyncProgress.Phase.CONTACTS ->
+        if (progress.total != null) stringResource(R.string.syncing_contacts_progress, progress.current, progress.total)
+        else stringResource(R.string.syncing_contacts)
+    accounts.lastSyncFailed(account) -> stringResource(R.string.sync_error)
+    else -> lastSyncedLabel(accounts.lastSynced(account))
+}
+
+/** This account's live progress, or null when nothing is syncing (or another account is). */
+@Composable
+fun syncProgressFor(account: Account): SyncProgress.State? {
+    val progress by SyncProgress.state.collectAsState()
+    return progress?.takeIf { it.accountName == account.name }
+}
+
+/** Determinate when the item count is known, indeterminate otherwise (Material 3 guidance). */
+@Composable
+fun SyncProgressBar(progress: SyncProgress.State, modifier: Modifier = Modifier) {
+    val fraction = progress.fraction()
+    if (fraction != null) LinearProgressIndicator(progress = { fraction }, modifier = modifier.fillMaxWidth())
+    else LinearProgressIndicator(modifier = modifier.fillMaxWidth())
+}

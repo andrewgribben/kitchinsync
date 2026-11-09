@@ -73,6 +73,7 @@ private class SyncAdapter(context: Context) : AbstractThreadedSyncAdapter(contex
             syncResult.stats.numIoExceptions++
         } finally {
             client.close()
+            SyncProgress.clear(account.name)
         }
     }
 }

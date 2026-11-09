@@ -6,6 +6,7 @@ import android.provider.ContactsContract
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -98,15 +99,19 @@ fun SettingsScreen(
         LazyColumn(contentPadding = padding) {
             item {
                 Card(Modifier.fillMaxWidth().padding(16.dp)) {
-                    Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            syncStatusLine(accounts, account),
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.weight(1f),
-                        )
-                        FilledTonalButton(onClick = { accounts.syncNow(account) }) {
-                            Text(stringResource(R.string.sync_now))
+                    val progress = syncProgressFor(account)
+                    Column {
+                        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                syncStatusText(accounts, account, progress),
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.weight(1f),
+                            )
+                            FilledTonalButton(onClick = { accounts.syncNow(account) }) {
+                                Text(stringResource(R.string.sync_now))
+                            }
                         }
+                        if (progress != null) SyncProgressBar(progress, Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
                     }
                 }
             }

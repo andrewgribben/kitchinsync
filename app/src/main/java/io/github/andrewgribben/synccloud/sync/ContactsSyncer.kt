@@ -169,6 +169,7 @@ class ContactsSyncer(
         }
 
         if (changedUrls.isEmpty()) return
+        var downloaded = 0
         for (batch in changedUrls.chunked(MULTIGET_BATCH_SIZE)) {
             for (content in remote.download(batch)) {
                 val fileName = content.url.encodedPath.substringAfterLast('/')
@@ -184,7 +185,9 @@ class ContactsSyncer(
                     if (existing != null) existing.apply { eTag = content.eTag }.update(contact)
                     else AndroidContact(addressBook, contact, fileName, content.eTag).add()
                 }
+                downloaded++
             }
+            SyncProgress.update(account.name, SyncProgress.Phase.CONTACTS, "Contacts", downloaded, changedUrls.size)
         }
     }
 
