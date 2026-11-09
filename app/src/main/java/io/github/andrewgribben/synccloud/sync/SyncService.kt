@@ -13,10 +13,7 @@ import android.provider.ContactsContract
 import androidx.core.content.PermissionChecker
 import at.bitfire.dav4jvm.ktor.exception.UnauthorizedException
 import io.github.andrewgribben.synccloud.account.ICloudAccounts
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.request.basicAuth
+import io.github.andrewgribben.synccloud.icloud.icloudHttpClient
 import java.io.IOException
 import java.util.logging.Logger
 
@@ -35,10 +32,7 @@ private class SyncAdapter(context: Context) : AbstractThreadedSyncAdapter(contex
             // Repeated here because the contacts permission may have been granted after setup
             accounts.makeContactsVisible(account)
 
-        val client = HttpClient(OkHttp) {
-            followRedirects = false
-            defaultRequest { basicAuth(account.name, accounts.password(account)) }
-        }
+        val client = icloudHttpClient(account.name, accounts.password(account))
         try {
             when (authority) {
                 CalendarContract.AUTHORITY -> {

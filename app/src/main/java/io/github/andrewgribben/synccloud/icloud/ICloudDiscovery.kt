@@ -18,9 +18,6 @@ import at.bitfire.dav4jvm.property.webdav.DisplayName
 import at.bitfire.dav4jvm.property.webdav.ResourceType
 import at.bitfire.dav4jvm.property.webdav.WebDAV
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.request.basicAuth
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.toList
 import kotlinx.serialization.Serializable
@@ -49,10 +46,7 @@ class ICloudDiscovery(
 ) {
 
     suspend fun discover(appleId: String, password: String): DiscoveryResult =
-        HttpClient(OkHttp) {
-            followRedirects = false // dav4jvm follows redirects itself, keeping track of the new location
-            defaultRequest { basicAuth(appleId, password) }
-        }.use { client ->
+        icloudHttpClient(appleId, password).use { client ->
             try {
                 val calendarHome = homeSet(client, caldavUrl, CalDAV.CalendarHomeSet)
                 val addressBookHome = homeSet(client, carddavUrl, CardDAV.AddressbookHomeSet)
