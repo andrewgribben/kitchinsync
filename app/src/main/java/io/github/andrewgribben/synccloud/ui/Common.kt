@@ -113,8 +113,11 @@ fun lastSyncedLabel(lastSyncedMillis: Long?): String {
  */
 @Composable
 fun syncStatusText(accounts: ICloudAccounts, account: Account, progress: SyncProgress.State?): String = when {
+    progress?.phase == SyncProgress.Phase.CALENDARS && progress.stage == SyncProgress.Stage.LISTING ->
+        if (progress.total != null) stringResource(R.string.syncing_calendars_listing, progress.label, progress.current, progress.total)
+        else stringResource(R.string.syncing_calendars, progress.label)
     progress?.phase == SyncProgress.Phase.CALENDARS ->
-        if (progress.total != null) stringResource(R.string.syncing_calendars_progress, progress.label, progress.current + 1, progress.total)
+        if (progress.total != null) stringResource(R.string.syncing_calendars_events, progress.label, progress.current, progress.total)
         else stringResource(R.string.syncing_calendars, progress.label)
     progress?.phase == SyncProgress.Phase.CONTACTS ->
         if (progress.total != null) stringResource(R.string.syncing_contacts_progress, progress.current, progress.total)

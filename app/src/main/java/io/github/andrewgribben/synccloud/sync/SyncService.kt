@@ -4,6 +4,7 @@ import android.accounts.Account
 import android.app.Service
 import android.content.AbstractThreadedSyncAdapter
 import android.content.ContentProviderClient
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.SyncResult
@@ -47,18 +48,23 @@ private class SyncAdapter(context: Context) : AbstractThreadedSyncAdapter(contex
             accounts.makeContactsVisible(account)
 
         val client = icloudHttpClient(account.name, accounts.password(account))
+        // CalendarProvider/ContactsProvider attach these extras for content-change-triggered
+        // syncs (see dumpsys content's FEED/LOCAL upload=true job types). Honouring them stops
+        // one local edit, or one calendar's CTag changing, from re-syncing every calendar.
+        val feedUrl = extras.getString("feed")
+        val uploadOnly = extras.getBoolean(ContentResolver.SYNC_EXTRAS_UPLOAD, false)
         try {
             when (authority) {
                 CalendarContract.AUTHORITY -> {
                     if (PermissionChecker.checkSelfPermission(context, android.Manifest.permission.WRITE_CALENDAR) != PermissionChecker.PERMISSION_GRANTED) return
-                    CalendarSyncer(account, provider, client).sync(accounts.calendars(account), syncResult)
+                    CalendarSyncer(account, provider, client).sync(accounts.calendars(account), syncResult, feedUrl, uploadOnly)
                 }
                 ContactsContract.AUTHORITY -> {
                     if (PermissionChecker.checkSelfPermission(context, android.Manifest.permission.WRITE_CONTACTS) != PermissionChecker.PERMISSION_GRANTED) return
                     val contactsEnabled = accounts.isSyncEnabled(account, ContactsContract.AUTHORITY)
                     val forcePhotoResync = contactsEnabled && !accounts.photosMigrated(account)
                     ContactsSyncer(account, context, provider, client)
-                        .sync(accounts.addressBookUrl(account), contactsEnabled, syncResult, forcePhotoResync)
+                        .sync(accounts.addressBookUrl(account), contactsEnabled, syncResult, forcePhotoResync, uploadOnly)
                     if (forcePhotoResync && !syncResult.hasError()) accounts.setPhotosMigrated(account, true)
                 }
             }

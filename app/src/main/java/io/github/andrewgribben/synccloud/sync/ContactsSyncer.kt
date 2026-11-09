@@ -65,6 +65,7 @@ class ContactsSyncer(
     private val storage = LocalStorageClient(providerClient)
     private val addressBook = AndroidAddressBook(context, account, storage, GroupMethod.GROUP_VCARDS)
     private val parser = VCardParser()
+    private var dbgCount = 0
     private val generator = VCardGenerator(VCardVersion.V3_0, includeTrailingSemicolons = true)
     private val photoDownloader = IcloudPhotoDownloader(httpClient)
 
@@ -76,8 +77,11 @@ class ContactsSyncer(
      * @param forcePhotoRedownload  re-downloads every contact's content once even if its ETag hasn't
      *                          changed, so contacts synced before photo downloading existed get their
      *                          photo too (see [ICloudAccounts.photosMigrated])
+     * @param uploadOnly        when set (from [android.content.ContentResolver.SYNC_EXTRAS_UPLOAD]),
+     *                          only uploads local dirty/deleted contacts; skips listing/downloading
+     *                          remote changes, so a local edit doesn't also trigger a full resync.
      */
-    fun sync(addressBookUrl: String?, enabled: Boolean, syncResult: SyncResult, forcePhotoRedownload: Boolean = false) {
+    fun sync(addressBookUrl: String?, enabled: Boolean, syncResult: SyncResult, forcePhotoRedownload: Boolean = false, uploadOnly: Boolean = false) {
         if (!enabled) {
             if (addressBookUrl != null) uploadPendingChangesBeforeRemoval(Url(addressBookUrl))
             removeAllLocalContacts()
@@ -89,7 +93,7 @@ class ContactsSyncer(
         }
 
         try {
-            runBlocking { syncAddressBook(Url(addressBookUrl), forcePhotoRedownload) }
+            runBlocking { syncAddressBook(Url(addressBookUrl), forcePhotoRedownload, uploadOnly) }
         } catch (e: RemoteConflictException) {
             logger.info("Resolved contacts conflict: ${e.message}")
         } catch (e: java.io.IOException) {
@@ -117,10 +121,14 @@ class ContactsSyncer(
         batch.commit()
     }
 
-    private suspend fun syncAddressBook(collectionUrl: Url, forcePhotoRedownload: Boolean) {
+    private suspend fun syncAddressBook(collectionUrl: Url, forcePhotoRedownload: Boolean, uploadOnly: Boolean) {
         val remote = RemoteAddressBookSync(httpClient, collectionUrl)
 
         uploadLocalChanges(remote)
+        // forcePhotoRedownload must still complete the full listing+download even on an
+        // upload-triggered sync, otherwise SyncService would mark photosMigrated=true without
+        // ever having actually re-downloaded photos.
+        if (uploadOnly && !forcePhotoRedownload) return
 
         // The forced resync always needs the full listing, since sync-collection would only
         // report members that actually changed since the last token.
@@ -173,6 +181,7 @@ class ContactsSyncer(
         for (batch in changedUrls.chunked(MULTIGET_BATCH_SIZE)) {
             for (content in remote.download(batch)) {
                 val fileName = content.url.encodedPath.substringAfterLast('/')
+                if ("PHOTO" in content.body && dbgCount++ < 2) android.util.Log.w("SCDEBUG", content.body.substringAfter("PHOTO").take(400).replace("\r", "<CR>").replace("\n", "<LF>").replace(Regex("[A-Za-z0-9+/=]{6,}"), "#"))
                 val vCard = parser.parse(StringReader(content.body)) ?: continue
                 val contact = ContactReader.fromVCard(vCard, photoDownloader)
 
@@ -187,7 +196,10 @@ class ContactsSyncer(
                 }
                 downloaded++
             }
-            SyncProgress.update(account.name, SyncProgress.Phase.CONTACTS, "Contacts", downloaded, changedUrls.size)
+            SyncProgress.update(
+                account.name, SyncProgress.Phase.CONTACTS, SyncProgress.Stage.ITEMS,
+                "Contacts", downloaded, changedUrls.size,
+            )
         }
     }
 

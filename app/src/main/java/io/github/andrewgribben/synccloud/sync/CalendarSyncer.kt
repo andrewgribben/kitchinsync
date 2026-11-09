@@ -45,18 +45,31 @@ class CalendarSyncer(
     private val generator = ICalendarGenerator()
     private val splitter = CalendarUidSplitter<VEvent>()
 
-    /** Reconciles local calendars with [choices], then syncs the content of every enabled one. */
-    fun sync(choices: List<Calendar>, syncResult: SyncResult) {
+    /** Reconciles local calendars with [choices], then syncs the content of every enabled one.
+     * @param feedUrl    when set (from the "feed" sync extra CalendarProvider attaches to a
+     *                    per-calendar content-change notification), only that one calendar is
+     *                    synced instead of looping over every enabled calendar.
+     * @param uploadOnly  when set (from [android.content.ContentResolver.SYNC_EXTRAS_UPLOAD]),
+     *                    only uploads local dirty/deleted events; skips the remote listing/
+     *                    download side entirely, so a local edit doesn't also trigger a full
+     *                    REPORT of every calendar.
+     */
+    fun sync(choices: List<Calendar>, syncResult: SyncResult, feedUrl: String? = null, uploadOnly: Boolean = false) {
         reconcileCalendars(choices)
 
-        val enabled = choices.filter { it.enabled }
+        val enabled = choices.filter { it.enabled }.let { all ->
+            if (feedUrl != null) all.filter { it.url == feedUrl } else all
+        }
         for ((index, choice) in enabled.withIndex()) {
             val local = calendarProvider.findFirstCalendar(
                 "${Calendars.NAME}=?", arrayOf(choice.url)
             ) ?: continue
-            SyncProgress.update(account.name, SyncProgress.Phase.CALENDARS, choice.displayName, index, enabled.size)
+            SyncProgress.update(
+                account.name, SyncProgress.Phase.CALENDARS, SyncProgress.Stage.LISTING,
+                choice.displayName, index + 1, enabled.size,
+            )
             try {
-                runBlocking { syncCalendar(local, choice, syncResult) }
+                runBlocking { syncCalendar(local, choice, syncResult, uploadOnly) }
             } catch (e: RemoteConflictException) {
                 // already resolved (server wins, we re-fetched) - nothing more to count as an error
                 logger.info("Resolved conflict in calendar ${choice.url}: ${e.message}")
@@ -117,12 +130,18 @@ class CalendarSyncer(
         }
     }
 
-    private suspend fun syncCalendar(local: AndroidCalendar, choice: Calendar, syncResult: SyncResult) {
+    private suspend fun syncCalendar(local: AndroidCalendar, choice: Calendar, syncResult: SyncResult, uploadOnly: Boolean) {
         val remote = RemoteCalendarSync(httpClient, Url(choice.url))
         val recurring = AndroidRecurringCalendar(local)
 
         if (!choice.readOnly)
             uploadLocalChanges(local, recurring, remote)
+
+        // A LOCAL upload=true sync (fired whenever we write to CalendarContract, even with
+        // CALLER_IS_SYNCADAPTER) only means "something changed locally"; the content above
+        // already pushed it. Downloading/listing every other calendar on top of that is exactly
+        // the sync churn this flag exists to avoid (see SyncService).
+        if (uploadOnly) return
 
         val lastState = RemoteSyncState.decode(local.readSyncState())
         when (SyncPlan.decide(lastState, syncTokenRejected = false)) {
@@ -213,7 +232,10 @@ class CalendarSyncer(
                     logger.log(java.util.logging.Level.WARNING, "Skipping unparsable event ${content.url}", e)
                 }
             }
-            SyncProgress.update(account.name, SyncProgress.Phase.CALENDARS, displayName, downloaded, changedUrls.size)
+            SyncProgress.update(
+                account.name, SyncProgress.Phase.CALENDARS, SyncProgress.Stage.ITEMS,
+                displayName, downloaded, changedUrls.size,
+            )
         }
     }
 

@@ -65,7 +65,8 @@
     <string name="password_needed">Password needed · tap to re-enter</string>
     <string name="sync_error">Couldn\'t reach iCloud — will retry</string>
     <string name="syncing_calendars">Syncing calendars… %1$s</string>
-    <string name="syncing_calendars_progress">Syncing calendars… %1$s %2$d / %3$d</string>
+    <string name="syncing_calendars_listing">Syncing %1$s (calendar %2$d of %3$d)…</string>
+    <string name="syncing_calendars_events">%1$s: %2$d / %3$d events</string>
     <string name="syncing_contacts">Syncing contacts…</string>
-    <string name="syncing_contacts_progress">Syncing contacts… %1$d / %2$d</string>
+    <string name="syncing_contacts_progress">%1$d / %2$d contacts</string>
 </resources>
