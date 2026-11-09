@@ -20,6 +20,10 @@ import kotlinx.coroutines.flow.toList
  */
 class RemoteAddressBookSync(private val httpClient: HttpClient, private val collectionUrl: Url) {
 
+    init {
+        FixedAddressDataFactory.installOnce()
+    }
+
     private fun addressBook() = DavAddressBook(httpClient, collectionUrl)
 
     suspend fun listChanges(syncToken: String?): ChangesResult =
