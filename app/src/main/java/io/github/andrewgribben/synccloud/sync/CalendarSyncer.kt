@@ -27,6 +27,10 @@ import java.io.StringWriter
 import java.util.logging.Logger
 import android.provider.CalendarContract.Events
 
+/** Narrows [enabled] to the single calendar matching [feedUrl] (from the "feed" sync extra), or returns all when null. */
+fun calendarsForFeed(enabled: List<Calendar>, feedUrl: String?): List<Calendar> =
+    if (feedUrl != null) enabled.filter { it.url == feedUrl } else enabled
+
 /**
  * Two-way CalDAV sync for one account's enabled calendars (VEVENT only). Mirrors DAVx5's
  * CalendarSyncManager / LocalCalendar approach, trimmed to iCloud's single-collection-per-calendar
@@ -57,9 +61,7 @@ class CalendarSyncer(
     fun sync(choices: List<Calendar>, syncResult: SyncResult, feedUrl: String? = null, uploadOnly: Boolean = false) {
         reconcileCalendars(choices)
 
-        val enabled = choices.filter { it.enabled }.let { all ->
-            if (feedUrl != null) all.filter { it.url == feedUrl } else all
-        }
+        val enabled = calendarsForFeed(choices.filter { it.enabled }, feedUrl)
         for ((index, choice) in enabled.withIndex()) {
             val local = calendarProvider.findFirstCalendar(
                 "${Calendars.NAME}=?", arrayOf(choice.url)
