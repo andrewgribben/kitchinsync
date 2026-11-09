@@ -41,7 +41,12 @@ iCal/vCard parsing or provider mapping.
 4. `src/main/res/values/about_strings.xml` dropped (DAVx⁵'s in-app "About"
    licenses screen; Synccloud has no such screen).
 
+5. Added `vcard/property/AppleLabels.kt` and used it in `ContactReader`
+   (labelled properties) and `ContactWriter.addLabeledProperty`: Apple label
+   tokens such as `_$!<Other>!$_` are shown as readable text on Android and
+   turned back into tokens on upload.
+
 ## Updating
 
-Re-run the copy from a newer davx5-ose commit, re-apply the same four
+Re-run the copy from a newer davx5-ose commit, re-apply the same five
 modifications, and update the commit SHA above.

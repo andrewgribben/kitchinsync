@@ -8,6 +8,7 @@ import at.bitfire.synctools.util.trimToNull
 import at.bitfire.synctools.vcard.property.CustomScribes.registerCustomScribes
 import at.bitfire.synctools.vcard.property.CustomType
 import at.bitfire.synctools.vcard.property.XAbDate
+import at.bitfire.synctools.vcard.property.AppleLabels
 import at.bitfire.synctools.vcard.property.XAbLabel
 import at.bitfire.synctools.vcard.property.XAbRelatedNames
 import at.bitfire.synctools.vcard.property.XPhoneticFirstName
@@ -184,7 +185,7 @@ class ContactReader internal constructor(val vCard: VCard, val downloader: Conta
                 is XPhoneticLastName ->
                     c.phoneticFamilyName = prop.value?.trimToNull()
                 is Nickname ->
-                    c.nickName = LabeledProperty(prop, findAndRemoveLabel(prop.group))
+                    c.nickName = LabeledProperty(prop, AppleLabels.fromApple(findAndRemoveLabel(prop.group)))
 
                 is Categories ->
                     c.categories.addAll(prop.values)
@@ -197,19 +198,19 @@ class ContactReader internal constructor(val vCard: VCard, val downloader: Conta
                     c.jobDescription = prop.value?.trimToNull()
 
                 is Telephone ->
-                    c.phoneNumbers += LabeledProperty(prop, findAndRemoveLabel(prop.group))
+                    c.phoneNumbers += LabeledProperty(prop, AppleLabels.fromApple(findAndRemoveLabel(prop.group)))
                 is Email ->
-                    c.emails += LabeledProperty(prop, findAndRemoveLabel(prop.group))
+                    c.emails += LabeledProperty(prop, AppleLabels.fromApple(findAndRemoveLabel(prop.group)))
                 is Impp ->
-                    c.impps += LabeledProperty(prop, findAndRemoveLabel(prop.group))
+                    c.impps += LabeledProperty(prop, AppleLabels.fromApple(findAndRemoveLabel(prop.group)))
                 is XSip ->
                     // special case: treat  X-SIP:address  as  IMPP:sip:address
                     c.impps += LabeledProperty(Impp.sip(prop.value))
                 is Url ->
-                    c.urls += LabeledProperty(prop, findAndRemoveLabel(prop.group))
+                    c.urls += LabeledProperty(prop, AppleLabels.fromApple(findAndRemoveLabel(prop.group)))
 
                 is Address ->
-                    c.addresses += LabeledProperty(prop, findAndRemoveLabel(prop.group))
+                    c.addresses += LabeledProperty(prop, AppleLabels.fromApple(findAndRemoveLabel(prop.group)))
                 is Label -> { /* drop vCard3 formatted address because it can't be associated to a specific address */ }
 
                 is Anniversary -> {

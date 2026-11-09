@@ -10,6 +10,7 @@ import at.bitfire.synctools.util.trimToNull
 import at.bitfire.synctools.vcard.VCardGenerator
 import at.bitfire.synctools.vcard.property.CustomType
 import at.bitfire.synctools.vcard.property.XAbDate
+import at.bitfire.synctools.vcard.property.AppleLabels
 import at.bitfire.synctools.vcard.property.XAbLabel
 import at.bitfire.synctools.vcard.property.XAbRelatedNames
 import at.bitfire.synctools.vcard.property.XAddressBookServerKind
@@ -292,7 +293,7 @@ class ContactWriter(
             property.group = itemId
 
             // 2. add label with same item ID
-            val label = XAbLabel(labeledProperty.label)
+            val label = XAbLabel(AppleLabels.toApple(labeledProperty.label))
             label.group = itemId
             vCard.addProperty(label)
         }
