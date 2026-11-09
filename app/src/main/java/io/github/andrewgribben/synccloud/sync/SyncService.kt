@@ -46,18 +46,28 @@ private class SyncAdapter(context: Context) : AbstractThreadedSyncAdapter(contex
                         .sync(accounts.addressBookUrl(account), contactsEnabled, syncResult)
                 }
             }
-            accounts.setLastSynced(account, System.currentTimeMillis())
-            if (accounts.status(account) == ICloudAccounts.STATUS_PASSWORD_NEEDED) {
-                accounts.setStatus(account, null)
-                SyncNotifications.cancelPasswordNeeded(context, account)
+            // Only report success (and clear any error status) when this sync didn't swallow an
+            // error into syncResult; otherwise the account would show "Synced" while e.g. every
+            // calendar actually timed out.
+            if (!syncResult.hasError()) {
+                accounts.setLastSynced(account, System.currentTimeMillis())
+                accounts.setLastSyncFailed(account, false)
+                if (accounts.status(account) == ICloudAccounts.STATUS_PASSWORD_NEEDED) {
+                    accounts.setStatus(account, null)
+                    SyncNotifications.cancelPasswordNeeded(context, account)
+                }
+            } else {
+                accounts.setLastSyncFailed(account, true)
             }
         } catch (e: UnauthorizedException) {
             logger.warning("iCloud rejected the password for ${account.name}")
             accounts.setStatus(account, ICloudAccounts.STATUS_PASSWORD_NEEDED)
+            accounts.setLastSyncFailed(account, true)
             SyncNotifications.notifyPasswordNeeded(context, account)
             syncResult.stats.numAuthExceptions++
         } catch (e: IOException) {
             logger.warning("I/O error syncing ${account.name}: ${e.message}")
+            accounts.setLastSyncFailed(account, true)
             syncResult.stats.numIoExceptions++
         } finally {
             client.close()

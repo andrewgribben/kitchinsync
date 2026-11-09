@@ -81,11 +81,13 @@ fun AccountsScreen(accounts: ICloudAccounts, onAdd: () -> Unit, onOpen: (Account
 @Composable
 private fun status(accounts: ICloudAccounts, account: Account): String {
     val calendars = accounts.calendars(account).count { it.enabled }
-    return listOfNotNull(
+    val summary = listOfNotNull(
         pluralStringResource(R.plurals.calendar_count, calendars, calendars),
         stringResource(R.string.contacts).takeIf { accounts.isSyncEnabled(account, ContactsContract.AUTHORITY) },
         stringResource(SyncInterval.of(accounts.interval(account)).label),
     ).joinToString(" · ")
+    val errorSuffix = stringResource(R.string.sync_error).takeIf { accounts.lastSyncFailed(account) }
+    return listOfNotNull(summary, errorSuffix).joinToString(" · ")
 }
 
 @Composable

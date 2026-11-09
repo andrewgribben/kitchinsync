@@ -100,7 +100,7 @@ fun SettingsScreen(
                 Card(Modifier.fillMaxWidth().padding(16.dp)) {
                     Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            lastSyncedLabel(accounts.lastSynced(account)),
+                            syncStatusLine(accounts, account),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.weight(1f),
                         )

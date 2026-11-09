@@ -1,6 +1,7 @@
 package io.github.andrewgribben.synccloud.ui
 
 import android.Manifest
+import android.accounts.Account
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -98,3 +99,11 @@ fun lastSyncedLabel(lastSyncedMillis: Long?): String {
         else -> "Synced ${minutes / (24 * 60)} d ago"
     }
 }
+
+/**
+ * Last sync outcome for display: [accounts.lastSyncFailed] must win over [lastSyncedLabel] so the
+ * UI never claims "Synced" for an attempt that actually recorded an I/O or auth error (see SyncService).
+ */
+@Composable
+fun syncStatusLine(accounts: ICloudAccounts, account: Account): String =
+    if (accounts.lastSyncFailed(account)) stringResource(R.string.sync_error) else lastSyncedLabel(accounts.lastSynced(account))
