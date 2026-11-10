@@ -43,9 +43,10 @@ private class IcloudPhotoDownloader(private val httpClient: HttpClient) : Contac
 
     override suspend fun download(url: String, accepts: String): ByteArray? = try {
         val response = httpClient.get(url) { headers.append(HttpHeaders.Accept, accepts) }
-        if (response.status.isSuccess()) response.body<ByteArray>() else null
+        if (response.status.isSuccess()) response.body<ByteArray>()
+        else null.also { logger.warning("Contact photo download failed: HTTP ${response.status.value}") }
     } catch (e: Exception) {
-        logger.warning("Could not download contact photo from $url: ${e.message}")
+        logger.log(java.util.logging.Level.WARNING, "Could not download contact photo", e)
         null
     }
 }
@@ -177,11 +178,15 @@ class ContactsSyncer(
 
         if (changedUrls.isEmpty()) return
         var downloaded = 0
+        var withPhoto = 0
+        var photoSaved = 0
         for (batch in changedUrls.chunked(MULTIGET_BATCH_SIZE)) {
             for (content in remote.download(batch)) {
                 val fileName = content.url.encodedPath.substringAfterLast('/')
                 val vCard = parser.parse(StringReader(content.body)) ?: continue
+                if (vCard.photos.isNotEmpty()) withPhoto++
                 val contact = ContactReader.fromVCard(vCard, photoDownloader)
+                if (contact.photo != null) photoSaved++
 
                 if (contact.group) {
                     val existing = findGroup(fileName)
@@ -199,6 +204,7 @@ class ContactsSyncer(
                 "Contacts", downloaded, changedUrls.size,
             )
         }
+        logger.info("Downloaded $downloaded contacts; $withPhoto have a PHOTO, $photoSaved photos fetched")
     }
 
     /** Resolves every group's [AddressContract.GroupColumns.PENDING_MEMBERS] (set by [applyRemoteChanges]) into actual memberships. */

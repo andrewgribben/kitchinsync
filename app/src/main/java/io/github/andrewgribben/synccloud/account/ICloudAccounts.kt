@@ -24,7 +24,7 @@ class ICloudAccounts(private val context: Context) {
         private const val KEY_ADDRESS_BOOK = "address_book_url"
         private const val KEY_LAST_SYNCED = "last_synced_millis"
         private const val KEY_LAST_SYNC_FAILED = "last_sync_failed"
-        private const val KEY_PHOTOS_MIGRATED = "photos_migrated_v2"
+        private const val KEY_PHOTOS_MIGRATED = "photos_migrated_v3"
         private const val KEY_STATUS = "status"
         const val STATUS_PASSWORD_NEEDED = "password_needed"
     }
