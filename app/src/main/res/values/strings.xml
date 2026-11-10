@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">KitchinSync</string>
+    <string name="account_type_label">iCloud</string>
+    <string name="account_settings">Account settings</string>
+    <string name="account_settings_summary">Calendars, contacts and sync interval</string>
+
+    <string name="app_specific_password_help_url" translatable="false">https://support.apple.com/en-us/102654</string>
+    <string name="back">Back</string>
+    <string name="cancel">Cancel</string>
+    <string name="close">Close</string>
+    <string name="more_options">More options</string>
+
+    <!-- Accounts -->
+    <string name="accounts_title">iCloud accounts</string>
+    <string name="add_account">Add account</string>
+    <string name="no_accounts">No accounts yet</string>
+    <string name="no_accounts_body">Add your Apple ID to sync iCloud calendars and contacts with this phone.</string>
+    <string name="no_accounts_password_prefix">You\'ll need an </string>
+    <string name="no_accounts_password_link">app-specific password</string>
+    <plurals name="calendar_count">
+        <item quantity="one">%d calendar</item>
+        <item quantity="other">%d calendars</item>
+    </plurals>
+    <string name="contacts">Contacts</string>
+
+    <!-- Sign in -->
+    <string name="add_icloud_account">Add iCloud account</string>
+    <string name="change_password">Change password</string>
+    <string name="apple_id">Apple ID (email)</string>
+    <string name="app_specific_password">App-specific password</string>
+    <string name="show_password">Show</string>
+    <string name="hide_password">Hide</string>
+    <string name="password_help">This isn\'t your Apple ID password. Create one at appleid.apple.com → Sign-In and Security → App-Specific Passwords.</string>
+    <string name="password_help_link">How do I get one? ↗</string>
+    <string name="sign_in">Sign in</string>
+    <string name="save">Save</string>
+    <string name="discovering">Finding your calendars and contacts…</string>
+    <string name="error_apple_id">Enter the email address of your Apple ID</string>
+    <string name="error_already_added">This Apple ID has already been added</string>
+    <string name="error_password_format">App-specific passwords have 16 letters, like abcd-efgh-ijkl-mnop</string>
+    <string name="error_wrong_password">Apple didn\'t accept that password. Check it\'s an app-specific password and try again.</string>
+    <string name="error_failed">Couldn\'t connect to iCloud: %s</string>
+
+    <!-- Choose what to sync / account settings -->
+    <string name="choose_what_to_sync">Choose what to sync</string>
+    <string name="calendars_header">Calendars</string>
+    <string name="contacts_header">Contacts</string>
+    <string name="sync_header">Sync</string>
+    <string name="icloud_contacts">iCloud contacts</string>
+    <string name="subscribed_read_only">Subscribed · read-only</string>
+    <string name="read_only">Read-only</string>
+    <string name="done">Done</string>
+    <string name="sync_now">Sync now</string>
+    <string name="sync_interval">Sync interval</string>
+    <string name="interval_15_min">Every 15 minutes</string>
+    <string name="interval_hour">Every hour</string>
+    <string name="interval_hour_recommended">Every hour (recommended)</string>
+    <string name="interval_4_hours">Every 4 hours</string>
+    <string name="interval_manual">Only when I tap Sync now</string>
+    <string name="remove_account">Remove account</string>
+    <string name="remove_account_title">Remove %s?</string>
+    <string name="remove_account_body">Its calendars and contacts are removed from this phone. Nothing is deleted on iCloud.</string>
+    <string name="remove">Remove</string>
+    <string name="password_needed">Password needed · tap to re-enter</string>
+    <string name="sync_error">Couldn\'t reach iCloud — will retry</string>
+    <string name="syncing_calendars">Syncing calendars… %1$s</string>
+    <string name="syncing_calendars_listing">Syncing %1$s (calendar %2$d of %3$d)…</string>
+    <string name="syncing_calendars_events">%1$s: %2$d / %3$d events</string>
+    <string name="syncing_contacts">Syncing contacts…</string>
+    <string name="syncing_contacts_progress">%1$d / %2$d contacts</string>
+</resources>
