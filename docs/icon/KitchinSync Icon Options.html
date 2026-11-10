@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>KitchinSync Icon Options</title>
+<style>
+  :root{ --ink:#1b1b1b; --bg:#f4f3ef; }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;padding:40px;}
+  h1{font-size:22px;margin:0 0 4px;}
+  p.lead{color:#555;margin:0 0 36px;max-width:760px;line-height:1.5;}
+  .direction{margin-bottom:56px;}
+  .direction.chosen{outline:3px solid #2a7a2a;outline-offset:12px;border-radius:12px;}
+  .direction h2{font-size:17px;margin:0 0 4px;}
+  .direction h2 .tag{display:inline-block;margin-left:10px;font-size:11px;font-weight:700;color:#fff;background:#2a7a2a;padding:2px 8px;border-radius:4px;vertical-align:middle;}
+  .direction .desc{color:#555;font-size:13px;margin:0 0 16px;max-width:760px;line-height:1.5;}
+  .row{display:flex;gap:28px;align-items:flex-end;flex-wrap:wrap;}
+  .cell{text-align:center;}
+  .cell .label{font-size:11px;color:#777;margin-top:8px;}
+  .swatch{display:inline-block;border-radius:8px;overflow:hidden;background:#ddd;}
+  .mask-circle{border-radius:50%;}
+  .mask-squircle{border-radius:38%;}
+  .mask-rsquare{border-radius:22%;}
+  .checker{background-image:conic-gradient(#e6e6e6 90deg,#fff 90deg 180deg,#e6e6e6 180deg 270deg,#fff 270deg);background-size:16px 16px;}
+  .zoomrow{display:flex;gap:40px;margin-top:40px;align-items:flex-start;}
+  .zoomrow .cell .label{max-width:200px;}
+</style>
+</head>
+<body>
+<h1>KitchinSync App Icon &mdash; Direction Exploration (v2: wide Belfast sink + tap)</h1>
+<p class="lead">Belfast sink: wide/low basin (~2:1 incl. apron), squared corners, a thick rim slab wider than the body, a flat apron front panel and a darker inner-basin band to show it's hollow. A chunky gooseneck tap sits behind the rim at one side &mdash; the strongest "this is a sink" cue at small sizes. A generic 3-lobe cloud sits inside the basin, puffing above the rim. Three background directions shown at full size, 48dp and 24dp, plus circle/squircle/rounded-square masks, a transparent-background foreground-only view, and a monochrome (Android 13 themed icon) version where the cloud/tap are kept clear of the rim with small gaps so nothing merges into a blob.</p>
+
+<script>
+function sinkCloud(bg, sinkColor, apronColor, shadeColor, tapColor, cloudColor, cloudHalo, showBg){
+  const rim = "M21,46 L87,46 C88.66,46 90,47.34 90,49 L90,55 C90,56.66 88.66,58 87,58 L21,58 C19.34,58 18,56.66 18,55 L18,49 C18,47.34 19.34,46 21,46 Z";
+  const basin = "M28,54 L80,54 C82.21,54 84,55.79 84,58 L84,78 C84,80.21 82.21,82 80,82 L28,82 C25.79,82 24,80.21 24,78 L24,58 C24,55.79 25.79,54 28,54 Z";
+  const shade = "M32,58 L76,58 C77.1,58 78,58.9 78,60 L78,62 C78,63.1 77.1,64 76,64 L32,64 C30.9,64 30,63.1 30,62 L30,60 C30,58.9 30.9,58 32,58 Z";
+  const apron = "M31,66 L77,66 C78.66,66 80,67.34 80,69 L80,79 C80,80.66 78.66,82 77,82 L31,82 C29.34,82 28,80.66 28,79 L28,69 C28,67.34 29.34,66 31,66 Z";
+  const tapBase = "M72,30 L74,30 C75.1,30 76,30.9 76,32 L76,42 C76,43.1 75.1,44 74,44 L72,44 C70.9,44 70,43.1 70,42 L70,32 C70,30.9 70.9,30 72,30 Z";
+  const tapNeck = "M72,26 L85,26 C86.1,26 87,26.9 87,28 L87,30 C87,31.1 86.1,32 85,32 L72,32 C70.9,32 70,31.1 70,30 L70,28 C70,26.9 70.9,26 72,26 Z";
+  const tapSpout = "M83,26 L85,26 C86.1,26 87,26.9 87,28 L87,38 C87,39.1 86.1,40 85,40 L83,40 C81.9,40 81,39.1 81,38 L81,28 C81,26.9 81.9,26 83,26 Z";
+  const haloL1 = "M23.5,42 C23.5,35.1 29.1,29.5 36,29.5 C42.9,29.5 48.5,35.1 48.5,42 C48.5,48.9 42.9,54.5 36,54.5 C29.1,54.5 23.5,48.9 23.5,42 Z";
+  const haloL2 = "M34.5,35 C34.5,26.44 41.44,19.5 50,19.5 C58.56,19.5 65.5,26.44 65.5,35 C65.5,43.56 58.56,50.5 50,50.5 C41.44,50.5 34.5,43.56 34.5,35 Z";
+  const haloL3 = "M50.5,42 C50.5,36.2 55.2,31.5 61,31.5 C66.8,31.5 71.5,36.2 71.5,42 C71.5,47.8 66.8,52.5 61,52.5 C55.2,52.5 50.5,47.8 50.5,42 Z";
+  const haloBase = "M34.5,40.5 L61.5,40.5 C66.47,40.5 70.5,44.53 70.5,49.5 C70.5,54.47 66.47,58.5 61.5,58.5 L34.5,58.5 C29.53,58.5 25.5,54.47 25.5,49.5 C25.5,44.53 29.53,40.5 34.5,40.5 Z";
+  const cloudL1 = "M26,42 C26,36.48 30.48,32 36,32 C41.52,32 46,36.48 46,42 C46,47.52 41.52,52 36,52 C30.48,52 26,47.52 26,42 Z";
+  const cloudL2 = "M37,35 C37,27.82 42.82,22 50,22 C57.18,22 63,27.82 63,35 C63,42.18 57.18,48 50,48 C42.82,48 37,42.18 37,35 Z";
+  const cloudL3 = "M53,42 C53,37.58 56.58,34 61,34 C65.42,34 69,37.58 69,42 C69,46.42 65.42,50 61,50 C56.58,50 53,46.42 53,42 Z";
+  const cloudBase = "M35,42 L61,42 C64.87,42 68,45.13 68,49 C68,52.87 64.87,56 61,56 L35,56 C31.13,56 28,52.87 28,49 C28,45.13 31.13,42 35,42 Z";
+  return `
+  <svg viewBox="0 0 108 108" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+    ${showBg !== false ? `<rect width="108" height="108" fill="${bg}"/>` : ''}
+    <path d="${rim}" fill="${sinkColor}"/>
+    <path d="${basin}" fill="${sinkColor}"/>
+    <path d="${tapBase}" fill="${tapColor}"/>
+    <path d="${tapNeck}" fill="${tapColor}"/>
+    <path d="${tapSpout}" fill="${tapColor}"/>
+    <path d="${shade}" fill="${shadeColor}" opacity="0.3"/>
+    <path d="${apron}" fill="${apronColor}"/>
+    <path d="${haloL1}" fill="${cloudHalo}"/>
+    <path d="${haloL2}" fill="${cloudHalo}"/>
+    <path d="${haloL3}" fill="${cloudHalo}"/>
+    <path d="${haloBase}" fill="${cloudHalo}"/>
+    <path d="${cloudL1}" fill="${cloudColor}"/>
+    <path d="${cloudL2}" fill="${cloudColor}"/>
+    <path d="${cloudL3}" fill="${cloudColor}"/>
+    <path d="${cloudBase}" fill="${cloudColor}"/>
+  </svg>`;
+}
+
+function monoSinkCloud(tint){
+  const rim = "M21,46 L87,46 C88.66,46 90,47.34 90,49 L90,55 C90,56.66 88.66,58 87,58 L21,58 C19.34,58 18,56.66 18,55 L18,49 C18,47.34 19.34,46 21,46 Z";
+  const basin = "M28,54 L80,54 C82.21,54 84,55.79 84,58 L84,78 C84,80.21 82.21,82 80,82 L28,82 C25.79,82 24,80.21 24,78 L24,58 C24,55.79 25.79,54 28,54 Z";
+  const tapBase = "M72,30 L74,30 C75.1,30 76,30.9 76,32 L76,42 C76,43.1 75.1,44 74,44 L72,44 C70.9,44 70,43.1 70,42 L70,32 C70,30.9 70.9,30 72,30 Z";
+  const tapNeck = "M72,26 L85,26 C86.1,26 87,26.9 87,28 L87,30 C87,31.1 86.1,32 85,32 L72,32 C70.9,32 70,31.1 70,30 L70,28 C70,26.9 70.9,26 72,26 Z";
+  const tapSpout = "M83,26 L85,26 C86.1,26 87,26.9 87,28 L87,38 C87,39.1 86.1,40 85,40 L83,40 C81.9,40 81,39.1 81,38 L81,28 C81,26.9 81.9,26 83,26 Z";
+  const mL1 = "M28,36 C28,31.58 31.58,28 36,28 C40.42,28 44,31.58 44,36 C44,40.42 40.42,44 36,44 C31.58,44 28,40.42 28,36 Z";
+  const mL2 = "M41,30 C41,25.03 45.03,21 50,21 C54.97,21 59,25.03 59,30 C59,34.97 54.97,39 50,39 C45.03,39 41,34.97 41,30 Z";
+  const mL3 = "M54,36 C54,32.13 57.13,29 61,29 C64.87,29 68,32.13 68,36 C68,39.87 64.87,43 61,43 C57.13,43 54,39.87 54,36 Z";
+  const mBase = "M33,36 L63,36 C65.21,36 67,37.79 67,40 C67,42.21 65.21,44 63,44 L33,44 C30.79,44 29,42.21 29,40 C29,37.79 30.79,36 33,36 Z";
+  return `
+  <svg viewBox="0 0 108 108" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+    <g fill="${tint}">
+      <path d="${rim}"/>
+      <path d="${basin}"/>
+      <path d="${tapBase}"/>
+      <path d="${tapNeck}"/>
+      <path d="${tapSpout}"/>
+      <path d="${mL1}"/>
+      <path d="${mL2}"/>
+      <path d="${mL3}"/>
+      <path d="${mBase}"/>
+    </g>
+  </svg>`;
+}
+
+const directions = [
+  {
+    name: "A &mdash; Sage green",
+    desc: "Warm, kitchen-garden green background. Strong contrast against the white sink and cream cloud.",
+    bg: "#5B7A5B", sink: "#FFFFFF", apron: "#DCE4DC", shade: "#2E4A2E", tap: "#DCE4DC", cloud: "#CFE3F2", halo: "#FFFFFF"
+  },
+  {
+    name: "B &mdash; Slate blue",
+    desc: "CHOSEN. Cooler, calm blue-grey, ties to the 'sync' idea without copying Apple's iCloud mark. Cloud is pale cream (not pale blue) so it stays legible against this blue background as well as the white sink.",
+    bg: "#44566E", sink: "#FFFFFF", apron: "#D6DEE8", shade: "#1F2C3C", tap: "#D6DEE8", cloud: "#FDF1DE", halo: "#FFFFFF",
+    chosen: true
+  },
+  {
+    name: "C &mdash; Terracotta",
+    desc: "Warm clay/terracotta, a classic farmhouse-kitchen tone.",
+    bg: "#C06A4C", sink: "#FFFFFF", apron: "#F0DCD2", shade: "#7A3A26", tap: "#F0DCD2", cloud: "#FFF3E8", halo: "#FFFFFF"
+  }
+];
+
+const sizes = [192,48,24];
+const masks = ["mask-circle","mask-squircle","mask-rsquare"];
+const maskLabels = ["Circle","Squircle","Rounded square"];
+
+let html = "";
+directions.forEach(d => {
+  html += `<div class="direction ${d.chosen ? 'chosen' : ''}"><h2>${d.name}${d.chosen ? '<span class="tag">Chosen for Android</span>' : ''}</h2><p class="desc">${d.desc}</p><div class="row">`;
+  sizes.forEach(s => {
+    html += `<div class="cell"><div class="swatch" style="width:${s}px;height:${s}px;">${sinkCloud(d.bg,d.sink,d.apron,d.shade,d.tap,d.cloud,d.halo)}</div><div class="label">${s}px square</div></div>`;
+  });
+  masks.forEach((m,i) => {
+    html += `<div class="cell"><div class="swatch ${m}" style="width:96px;height:96px;">${sinkCloud(d.bg,d.sink,d.apron,d.shade,d.tap,d.cloud,d.halo)}</div><div class="label">${maskLabels[i]}</div></div>`;
+  });
+  html += `<div class="cell"><div class="swatch checker" style="width:96px;height:96px;">${sinkCloud('transparent',d.sink,d.apron,d.shade,d.tap,d.cloud,d.halo,false)}</div><div class="label">Foreground only (transparent bg)</div></div>`;
+  html += `<div class="cell"><div class="swatch" style="width:96px;height:96px;background:#1b1b1b;">${monoSinkCloud('#FFFFFF')}</div><div class="label">Monochrome, on dark</div></div>`;
+  html += `<div class="cell"><div class="swatch" style="width:96px;height:96px;background:#f0f0f0;">${monoSinkCloud('#1b1b1b')}</div><div class="label">Monochrome, on light</div></div>`;
+  html += `</div></div>`;
+});
+
+const chosen = directions.find(d => d.chosen);
+html += `<div class="direction"><h2>Chosen direction &mdash; 4&times; zoom crops for legibility check</h2><p class="desc">Rendered at native 24px/48px (the real on-screen size), then this HTML scales the box up 4&times; so the capture shows the same pixel data larger &mdash; not a redraw at higher resolution.</p><div class="zoomrow">`;
+html += `<div class="cell"><div class="swatch" style="width:96px;height:96px;"><div style="width:24px;height:24px;transform:scale(4);transform-origin:top left;">${sinkCloud(chosen.bg,chosen.sink,chosen.apron,chosen.shade,chosen.tap,chosen.cloud,chosen.halo)}</div></div><div class="label">Colour, 24dp at 4&times;</div></div>`;
+html += `<div class="cell"><div class="swatch" style="width:192px;height:192px;"><div style="width:48px;height:48px;transform:scale(4);transform-origin:top left;">${sinkCloud(chosen.bg,chosen.sink,chosen.apron,chosen.shade,chosen.tap,chosen.cloud,chosen.halo)}</div></div><div class="label">Colour, 48dp at 4&times;</div></div>`;
+html += `<div class="cell"><div class="swatch" style="width:96px;height:96px;background:#1b1b1b;"><div style="width:24px;height:24px;transform:scale(4);transform-origin:top left;">${monoSinkCloud('#FFFFFF')}</div></div><div class="label">Monochrome, 24dp at 4&times;, on dark</div></div>`;
+html += `</div></div>`;
+
+document.write(html);
+</script>
+
+</body>
+</html>

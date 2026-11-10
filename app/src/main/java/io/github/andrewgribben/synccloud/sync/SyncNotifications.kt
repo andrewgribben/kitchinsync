@@ -33,7 +33,7 @@ object SyncNotifications {
         )
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_cloud)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle("KitchinSync · ${account.name}")
             .setContentText("iCloud stopped accepting the password. Tap to enter a new app-specific password.")
             .setAutoCancel(true)

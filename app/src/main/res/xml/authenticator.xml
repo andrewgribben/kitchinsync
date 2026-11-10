@@ -4,4 +4,4 @@
     android:accountType="io.github.andrewgribben.synccloud.icloud"
     android:icon="@mipmap/ic_launcher"
     android:label="@string/account_type_label"
-    android:smallIcon="@mipmap/ic_launcher" />
+    android:smallIcon="@drawable/ic_notification" />
