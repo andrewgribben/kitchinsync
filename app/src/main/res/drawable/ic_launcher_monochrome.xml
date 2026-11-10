@@ -1,25 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Single-colour silhouette for Android 13+ themed icons. The system tints
-     this with the user's wallpaper colour, so only one flat shape/alpha is used. -->
+<!-- Themed-icon (Android 13+) silhouette: same shapes as the foreground, one colour.
+     The 2-unit gap between cloud and rim keeps them separate when tinted. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
 
+    <group android:translateY="-3.35">
+        <clip-path android:pathData="M0,0 L108,0 L108,51.35 L0,51.35 Z" />
+        <path
+            android:pathData="M34,52 C34,45.92 38.92,41 45,41 C48.17,41 51.02,42.34 53.02,44.47 C54.77,42.3 57.43,40.9 60.4,40.9 C65.52,40.9 69.8,44.5 70.74,49.3 C74.74,49.9 77.8,53.35 77.8,57.5 C77.8,62.1 74.07,65.8 69.5,65.8 L40.3,65.8 C35.72,65.8 32,62.1 32,57.5 C32,54.52 33.56,51.9 36,50.4 C35.4,51 34,51.4 34,52 Z"
+            android:fillColor="#FFFFFF" />
+    </group>
+
+    <!-- rim -->
     <path
-        android:pathData="M27,62 L81,62 L81,85 C81,86.66 79.66,88 78,88 L30,88 C28.34,88 27,86.66 27,85 Z"
+        android:pathData="M21,50 L87,50 C88.66,50 90,51.34 90,53 L90,55 C90,56.66 88.66,58 87,58 L21,58 C19.34,58 18,56.66 18,55 L18,53 C18,51.34 19.34,50 21,50 Z"
         android:fillColor="#FFFFFF" />
 
+    <!-- basin -->
     <path
-        android:pathData="M22,44 L86,44 L86,70 C86,75.52 81.52,80 76,80 L32,80 C26.48,80 22,75.52 22,70 Z"
-        android:fillColor="#FFFFFF" />
-
-    <path
-        android:pathData="M25,36 L83,36 C86.87,36 90,39.13 90,43 C90,46.87 86.87,50 83,50 L25,50 C21.13,50 18,46.87 18,43 C18,39.13 21.13,36 25,36 Z"
-        android:fillColor="#FFFFFF" />
-
-    <path
-        android:pathData="M34,52 C34,45.92 38.92,41 45,41 C48.17,41 51.02,42.34 53.02,44.47 C54.77,42.3 57.43,40.9 60.4,40.9 C65.52,40.9 69.8,44.5 70.74,49.3 C74.74,49.9 77.8,53.35 77.8,57.5 C77.8,62.1 74.07,65.8 69.5,65.8 L40.3,65.8 C35.72,65.8 32,62.1 32,57.5 C32,54.52 33.56,51.9 36,50.4 C35.4,51 34,51.4 34,52 Z"
+        android:pathData="M22,57 L86,57 L86,71 C86,72.66 84.66,74 83,74 L25,74 C23.34,74 22,72.66 22,71 Z"
         android:fillColor="#FFFFFF" />
 </vector>
