@@ -1,26 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Themed-icon (Android 13+) silhouette: same shapes as the foreground, one colour.
-     The 2-unit gap between cloud and rim keeps them separate when tinted. -->
+<!-- Themed-icon (Android 13+) silhouette: same shapes as ic_launcher_foreground, one colour.
+     The 3-unit gap between cloud and rim keeps them separate when tinted. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <group android:translateY="-3.35">
-        <clip-path android:pathData="M0,0 L108,0 L108,51.35 L0,51.35 Z" />
-        <path
-            android:pathData="M34,52 C34,45.92 38.92,41 45,41 C48.17,41 51.02,42.34 53.02,44.47 C54.77,42.3 57.43,40.9 60.4,40.9 C65.52,40.9 69.8,44.5 70.74,49.3 C74.74,49.9 77.8,53.35 77.8,57.5 C77.8,62.1 74.07,65.8 69.5,65.8 L40.3,65.8 C35.72,65.8 32,62.1 32,57.5 C32,54.52 33.56,51.9 36,50.4 C35.4,51 34,51.4 34,52 Z"
-            android:fillColor="#FFFFFF" />
-    </group>
+    <!-- cloud / bubbles -->
+    <path
+        android:pathData="M34.02,45 A7,7 0 0 1 45.68,40.29 A10,10 0 0 1 63.77,41.25 A6,6 0 0 1 73.98,45 Z"
+        android:fillColor="#FFFFFF" />
 
     <!-- rim -->
     <path
-        android:pathData="M21,50 L87,50 C88.66,50 90,51.34 90,53 L90,55 C90,56.66 88.66,58 87,58 L21,58 C19.34,58 18,56.66 18,55 L18,53 C18,51.34 19.34,50 21,50 Z"
+        android:pathData="M24,48 L84,48 A3,3 0 0 1 87,51 L87,53 A3,3 0 0 1 84,56 L24,56 A3,3 0 0 1 21,53 L21,51 A3,3 0 0 1 24,48 Z"
         android:fillColor="#FFFFFF" />
 
     <!-- basin -->
     <path
-        android:pathData="M22,57 L86,57 L86,71 C86,72.66 84.66,74 83,74 L25,74 C23.34,74 22,72.66 22,71 Z"
+        android:pathData="M25,55 L83,55 L83,69 A3,3 0 0 1 80,72 L28,72 A3,3 0 0 1 25,69 Z"
         android:fillColor="#FFFFFF" />
 </vector>
