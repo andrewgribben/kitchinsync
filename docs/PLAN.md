@@ -1,4 +1,4 @@
-# Synccloud: design plan (draft for review)
+# KitchinSync: design plan (draft for review)
 
 ## Problem
 
@@ -20,7 +20,7 @@ Don't write a new CalDAV/CardDAV stack. Reuse the code that DAVx⁵ ships to mil
 | UI | Kotlin, Jetpack Compose, Material 3, dynamic colour | Apache-2.0 |
 | DI / persistence | Plain constructors; per-account settings in `AccountManager` userdata (see [Stage 1 decisions](#stage-1-decisions)) | platform |
 
-Because synctools is GPL-3.0, **Synccloud is GPL-3.0-or-later**. That suits an open-source app. The MPL/BSD-only alternative would mean rewriting the provider-mapping layer ourselves, which goes against the "don't reinvent the wheel" goal.
+Because synctools is GPL-3.0, **KitchinSync is GPL-3.0-or-later**. That suits an open-source app. The MPL/BSD-only alternative would mean rewriting the provider-mapping layer ourselves, which goes against the "don't reinvent the wheel" goal.
 
 ### iCloud specifics
 
@@ -34,12 +34,12 @@ Because synctools is GPL-3.0, **Synccloud is GPL-3.0-or-later**. That suits an o
 ### Android integration (what makes it feel native)
 
 - Account type `io.github.andrewgribben.synccloud.icloud`, shown as **"iCloud"** with the iCloud-style cloud icon in Settings → Accounts.
-- `res/xml/authenticator.xml` declares `accountPreferences`, so **Settings → Accounts → iCloud → (account)** links to Synccloud's account settings screen.
+- `res/xml/authenticator.xml` declares `accountPreferences`, so **Settings → Accounts → iCloud → (account)** links to KitchinSync's account settings screen.
 - Two sync adapters (`com.android.calendar`, `com.android.contacts`), so the system **Account sync** screen shows *Calendar* and *Contacts* switches plus *Sync now*.
 - `contacts.xml` (`ContactsAccountType`) defines how the account appears in the Contacts app's account picker for new contacts.
 - No app-specific notification noise. A notification appears only for actionable errors, such as a revoked password ("Re-enter password").
 
-## Screens (see `docs/wireframes/Synccloud Wireframes.html`)
+## Screens (see `docs/wireframes/KitchinSync Wireframes.html`)
 
 1. **Accounts** (launcher): list of iCloud accounts with status, and a FAB to add one. Empty state explains app-specific passwords.
 2. **Sign in**: Apple ID plus app-specific password, with a link to Apple's instructions.
@@ -51,7 +51,7 @@ Because synctools is GPL-3.0, **Synccloud is GPL-3.0-or-later**. That suits an o
 ## Project layout (proposed)
 
 ```
-synccloud/
+kitchinsync/
   app/                 Compose UI, account authenticator, sync adapters
   core/icloud/         iCloud discovery + auth (dav4jvm)
   core/sync/           calendar & contacts syncers (synctools)

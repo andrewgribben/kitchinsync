@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Synccloud</string>
+    <string name="app_name">KitchinSync</string>
     <string name="account_type_label">iCloud</string>
     <string name="account_settings">Account settings</string>
     <string name="account_settings_summary">Calendars, contacts and sync interval</string>

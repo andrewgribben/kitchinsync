@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 @Composable
-fun SynccloudTheme(content: @Composable () -> Unit) {
+fun KitchinSyncTheme(content: @Composable () -> Unit) {
     val dark = isSystemInDarkTheme()
     val colors = when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {

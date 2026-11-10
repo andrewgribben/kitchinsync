@@ -10,7 +10,7 @@ import androidx.core.app.NotificationCompat
 import io.github.andrewgribben.synccloud.MainActivity
 import io.github.andrewgribben.synccloud.R
 
-/** The only notification Synccloud sends (wireframe B4): iCloud rejected the password. */
+/** The only notification KitchinSync sends (wireframe B4): iCloud rejected the password. */
 object SyncNotifications {
     private const val CHANNEL_ID = "password_needed"
 
@@ -34,7 +34,7 @@ object SyncNotifications {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_cloud)
-            .setContentTitle("Synccloud · ${account.name}")
+            .setContentTitle("KitchinSync · ${account.name}")
             .setContentText("iCloud stopped accepting the password. Tap to enter a new app-specific password.")
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)

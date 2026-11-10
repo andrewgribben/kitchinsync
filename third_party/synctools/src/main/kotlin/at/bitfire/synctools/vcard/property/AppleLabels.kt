@@ -1,5 +1,5 @@
 /*
- * Synccloud modification (not upstream). GPL-3.0-or-later.
+ * KitchinSync modification (not upstream). GPL-3.0-or-later.
  */
 
 package at.bitfire.synctools.vcard.property

@@ -16,7 +16,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:allowBackup="false"
-        android:theme="@style/Theme.Synccloud">
+        android:theme="@style/Theme.KitchinSync">
 
         <!-- Exported so Settings → Accounts can open account settings (see xml/account_preferences.xml) -->
         <activity

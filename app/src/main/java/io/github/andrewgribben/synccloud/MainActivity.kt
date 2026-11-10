@@ -13,7 +13,7 @@ import io.github.andrewgribben.synccloud.account.ICloudAccounts
 import io.github.andrewgribben.synccloud.ui.App
 import io.github.andrewgribben.synccloud.ui.MainViewModel
 import io.github.andrewgribben.synccloud.ui.Screen
-import io.github.andrewgribben.synccloud.ui.SynccloudTheme
+import io.github.andrewgribben.synccloud.ui.KitchinSyncTheme
 
 /**
  * Hosts all screens. Besides the launcher, it's opened by AccountManager to add an account
@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
         )
 
         setContent {
-            SynccloudTheme {
+            KitchinSyncTheme {
                 App(vm, onAccountAdded = ::onAccountAdded, onExit = ::finish)
             }
         }

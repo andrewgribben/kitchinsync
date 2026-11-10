@@ -303,7 +303,7 @@ class CalendarSyncer(
     }
 
     companion object {
-        private const val PROD_ID = "-//Synccloud//Synccloud Android//EN"
+        private const val PROD_ID = "-//KitchinSync//KitchinSync Android//EN"
         private const val MULTIGET_BATCH_SIZE = 30
     }
 }

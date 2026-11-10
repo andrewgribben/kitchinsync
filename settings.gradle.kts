@@ -18,7 +18,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "synccloud"
+rootProject.name = "kitchinsync"
 include(":app")
 include(":synctools")
 project(":synctools").projectDir = file("third_party/synctools")
